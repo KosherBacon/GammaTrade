@@ -1,0 +1,45 @@
+syntax = "proto2";
+
+option java_package = "gy.jk.proto";
+option java_outer_classname = "Shared";
+
+message BacktestResult {
+    optional double total_profit = 1;
+    optional double number_of_ticks = 2;
+    optional double average_profit = 3;
+    optional double number_of_trades = 4;
+    optional double profitable_trades_ratio = 5;
+    optional double maximum_drawdown = 6;
+    optional double reward_risk_ratio = 7;
+    optional double buy_and_hold = 8;
+}
+
+message Exchange {
+    enum Name {
+        GDAX = 1;
+        Bitstamp = 2;
+    }
+    optional Name name = 1;
+}
+
+message Trade {
+    optional Exchange exchange = 1;
+    optional double price = 2;
+    optional double size = 3;
+    enum CurrencyPair {
+        BTC_USD = 1;
+    }
+    optional CurrencyPair currency_pair = 4;
+    optional string id = 5;
+}
+
+// Provide a way to serialize a BigDecimal into a proto message.
+message BDecimal {
+    optional int32 scale = 1;
+    optional BInteger int_val = 2;
+}
+
+// Provide a way to serialize a BigInteger into a proto message.
+message BInteger {
+    optional bytes value = 1;
+}
