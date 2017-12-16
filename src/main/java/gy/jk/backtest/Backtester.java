@@ -94,7 +94,7 @@ public class Backtester {
         System.exit(0);
       }
       public void onFailure(Throwable t) {
-        t.printStackTrace();
+        LOG.error("Backtest Failed", t);
         System.exit(1);
       }
     });
