@@ -12,6 +12,9 @@ message BacktestResult {
     optional double maximum_drawdown = 6;
     optional double reward_risk_ratio = 7;
     optional double buy_and_hold = 8;
+    optional double versus_buy_and_hold = 9;
+    // Total transaction cost (from $1000)
+    optional double total_transaction_cost = 10;
 }
 
 message Exchange {

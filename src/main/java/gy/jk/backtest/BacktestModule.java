@@ -3,6 +3,8 @@ package gy.jk.backtest;
 import com.google.inject.AbstractModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import gy.jk.backtest.Annotations.ExchangeFixedFee;
+import gy.jk.backtest.Annotations.ExchangePercentFee;
 import gy.jk.strategy.PrimaryStrategy;
 import gy.jk.strategy.RSIStrategy;
 import gy.jk.strategy.StrategyBuilder;
@@ -21,5 +23,9 @@ public class BacktestModule extends AbstractModule {
         bind(StrategyBuilder.class).to(RSIStrategy.class);
         break;
     }
+    bindConstant().annotatedWith(ExchangePercentFee.class)
+        .to(BACKTEST_CONFIG.getDouble("exchangePercentFee"));
+    bindConstant().annotatedWith(ExchangeFixedFee.class)
+        .to(BACKTEST_CONFIG.getDouble("exchangeFixedFee"));
   }
 }

@@ -7,6 +7,8 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gy.jk.BackendModule;
+import gy.jk.backtest.Annotations.ExchangeFixedFee;
+import gy.jk.backtest.Annotations.ExchangePercentFee;
 import gy.jk.proto.Shared.BacktestResult;
 import gy.jk.strategy.StrategyBuilder;
 import gy.jk.tick.TickModule;
@@ -29,12 +31,16 @@ public class Backtester {
 
   private final StrategyBuilder strategyBuilder;
   private final BacktestDataLoader backtestDataLoader;
+  private final double exchangePercentFee;
+  private final double exchangeFixedFee;
 
   @Inject
-  Backtester(StrategyBuilder strategyBuilder,
-      BacktestDataLoader backtestDataLoader) {
+  Backtester(StrategyBuilder strategyBuilder, BacktestDataLoader backtestDataLoader,
+      @ExchangePercentFee double exchangePercentFee, @ExchangeFixedFee double exchangeFixedFee) {
     this.strategyBuilder = strategyBuilder;
     this.backtestDataLoader = backtestDataLoader;
+    this.exchangePercentFee = exchangePercentFee;
+    this.exchangeFixedFee = exchangeFixedFee;
   }
 
   public ListenableFuture<BacktestResult> runBacktest() {
@@ -46,8 +52,13 @@ public class Backtester {
       TimeSeriesManager timeSeriesManager = new TimeSeriesManager(timeSeries);
       TradingRecord tradingRecord = timeSeriesManager.run(
           strategyBuilder.buildStrategy(timeSeries));
+
+      TotalProfitCriterion totalProfit = new TotalProfitCriterion();
+      LinearTransactionCostCriterion transactionCost =
+          new LinearTransactionCostCriterion(1000, exchangePercentFee, exchangeFixedFee);
+
       ListenableFuture<BacktestResult> result = Futures.immediateFuture(BacktestResult.newBuilder()
-          .setTotalProfit(new TotalProfitCriterion().calculate(timeSeries, tradingRecord))
+          .setTotalProfit(totalProfit.calculate(timeSeries, tradingRecord))
           .setNumberOfTicks(new NumberOfTicksCriterion().calculate(timeSeries, tradingRecord))
           .setAverageProfit(new AverageProfitCriterion().calculate(timeSeries, tradingRecord))
           .setNumberOfTrades(new NumberOfTradesCriterion().calculate(timeSeries, tradingRecord))
@@ -56,6 +67,9 @@ public class Backtester {
           .setMaximumDrawdown(new MaximumDrawdownCriterion().calculate(timeSeries, tradingRecord))
           .setRewardRiskRatio(new RewardRiskRatioCriterion().calculate(timeSeries, tradingRecord))
           .setBuyAndHold(new BuyAndHoldCriterion().calculate(timeSeries, tradingRecord))
+          .setVersusBuyAndHold(
+              new VersusBuyAndHoldCriterion(totalProfit).calculate(timeSeries, tradingRecord))
+          .setTotalTransactionCost(transactionCost.calculate(timeSeries, tradingRecord))
           .build());
 
       Instant end = Instant.now();
