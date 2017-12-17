@@ -90,7 +90,7 @@ public class Backtester {
     ListenableFuture<BacktestResult> result = backtester.runBacktest();
     Futures.addCallback(result, new FutureCallback<BacktestResult>() {
       public void onSuccess(BacktestResult result) {
-        System.out.println(result);
+        LOG.info("BacktestResults\n{}", result.toString());
         System.exit(0);
       }
       public void onFailure(Throwable t) {

@@ -28,8 +28,7 @@ public class GdaxTradingEngine implements TradingApi {
 
   @Inject
   GdaxTradingEngine(ListeningExecutorService executorService, TradeService tradeService,
-      AccountService accountService, @LiveTrading boolean liveTrading,
-      Emailer emailer) {
+      AccountService accountService, @LiveTrading boolean liveTrading, Emailer emailer) {
     this.executorService = executorService;
     this.tradeService = tradeService;
     this.accountService = accountService;
