@@ -29,6 +29,9 @@ public class BacktestModule extends AbstractModule {
       case "kurt":
         bind(StrategyBuilder.class).to(KurtStrategy.class);
         break;
+      case "momentum":
+        bind(StrategyBuilder.class).to(MomentumStrategy.class);
+        break;
     }
     bindConstant().annotatedWith(ExchangePercentFee.class)
         .to(BACKTEST_CONFIG.getDouble("exchangePercentFee"));
