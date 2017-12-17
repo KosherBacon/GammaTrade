@@ -73,7 +73,7 @@ public class ExchangeConnector {
     disposableTable.put(exchange, CurrencyPair.BTC_USD, disposable);
   }
 
-  private void verifyConnection() {
+  public void verifyConnection() {
     disposableTable.values().forEach(disposable -> {
       if (disposable.isDisposed()) {
         // Connection not open, PANIC.
