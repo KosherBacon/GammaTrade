@@ -13,11 +13,13 @@ import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ta4j.core.Decimal;
 import org.ta4j.core.Strategy;
 import org.ta4j.core.Tick;
 import org.ta4j.core.TimeSeries;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +30,9 @@ public class Trader {
 
   private static final Logger LOG = LoggerFactory.getLogger(Trader.class);
 
+  private static final MathContext MATH_CONTEXT = Decimal.MATH_CONTEXT;
+  private static final BigDecimal COUNTER_KEEP = new BigDecimal("0.95", MATH_CONTEXT);
+
   private final Strategy strategy;
   private final TimeSeries timeSeries;
   private final TradingApi tradingApi;
@@ -36,6 +41,7 @@ public class Trader {
   private final BigDecimal maximumOrderSize;
 
   private OrderState lastOrder;
+  private BigDecimal tickClose;
 
   @Inject
   Trader(@TradeStrategy StrategyBuilder strategyBuilder, TimeSeries timeSeries,
@@ -50,6 +56,7 @@ public class Trader {
     this.maximumOrderSize = maximumOrderSize;
 
     this.lastOrder = null;
+    this.tickClose = null;
   }
 
   public synchronized void receiveAndProcessTick(Tick tick) {
@@ -63,6 +70,9 @@ public class Trader {
       lastOrder = new OrderState();
       LOG.info("First tick added, creating new OrderState object.");
     }
+
+    // Get the close price of the tick.
+    tickClose = new BigDecimal(tick.getClosePrice().toDouble(), MATH_CONTEXT);
 
     int endIndex = timeSeries.getEndIndex();
     if (strategy.shouldEnter(endIndex)) {
@@ -93,9 +103,11 @@ public class Trader {
     LOG.info("Executing buy order on {}", tradingApi.getMarketName());
     lastOrder.type = OrderType.BID;
 
+    // Get the amount of available USD in the account.
     ListenableFuture<BigDecimal> counterBalance =
         tradingApi.getAvailableBalance(currencyPair.counter);
-    ListenableFuture<String> tradeId = Futures.transformAsync(counterBalance, amount ->
+    ListenableFuture<BigDecimal> buyableAmount = getBuyableAmount(counterBalance);
+    ListenableFuture<String> tradeId = Futures.transformAsync(buyableAmount, amount ->
         tradingApi.createMarketOrder(OrderType.BID, currencyPair, amount.min(maximumOrderSize)));
     tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
 
@@ -109,6 +121,14 @@ public class Trader {
         tradingApi.haltTrading();
       }
     });
+  }
+
+  private ListenableFuture<BigDecimal> getBuyableAmount(
+      ListenableFuture<BigDecimal> counterBalance) {
+    // Counter * COUNTER_KEEP / lastTick
+    return Futures.transformAsync(counterBalance, amount ->
+        Futures.immediateFuture(
+            amount.multiply(COUNTER_KEEP, MATH_CONTEXT).divide(tickClose, MATH_CONTEXT)));
   }
 
   /**
