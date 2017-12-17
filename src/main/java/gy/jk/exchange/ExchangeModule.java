@@ -1,9 +1,6 @@
 package gy.jk.exchange;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gy.jk.exchange.Annotations.*;
@@ -15,8 +12,6 @@ import org.knowm.xchange.ExchangeSpecification;
 import org.knowm.xchange.gdax.GDAXExchange;
 import org.knowm.xchange.service.account.AccountService;
 import org.knowm.xchange.service.trade.TradeService;
-
-import java.util.List;
 
 public class ExchangeModule extends AbstractModule {
 

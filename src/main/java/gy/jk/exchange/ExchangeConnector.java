@@ -6,7 +6,6 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
 import com.google.inject.Inject;
 import gy.jk.datarecorder.TradeReceiver;
 import gy.jk.exchange.Annotations.ExchangeConnectionTimeout;
-import gy.jk.exchange.Annotations.StreamingExchangeList;
 import gy.jk.proto.Shared;
 import gy.jk.proto.Shared.Trade;
 import info.bitrich.xchangestream.core.StreamingExchange;
@@ -16,7 +15,6 @@ import org.knowm.xchange.currency.CurrencyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ExchangeConnector {
