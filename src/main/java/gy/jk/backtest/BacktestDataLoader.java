@@ -47,7 +47,7 @@ public class BacktestDataLoader {
       LOG.info("Loading backtest data from krakenUSD.csv.");
 
       InputStream stream =
-          BacktestDataLoader.class.getResourceAsStream("/data/krakenUSD1.csv");
+          BacktestDataLoader.class.getResourceAsStream("/data/krakenUSD3.csv");
       CSVReader csvReader = null;
       List<String[]> lines = new ArrayList<>();
 

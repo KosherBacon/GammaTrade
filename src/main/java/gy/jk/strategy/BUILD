@@ -24,6 +24,7 @@ java_library(
 java_library(
     name = "strategy",
     srcs = [
+        "MomentumStrategy.java",
         "CCICorrectionStrategy.java",
         "GlobalExtremaStrategy.java",
         "KurtStrategy.java",

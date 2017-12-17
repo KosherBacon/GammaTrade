@@ -11,22 +11,22 @@ public class PrimaryStrategy implements StrategyBuilder {
   /**
    * The number of ticks needed for the strategy to be fully functional.
    */
-  private static final int UNSTABLE_PERIOD = 2;
+  private static final int UNSTABLE_PERIOD = 3;
 
   /**
    * The number of periods to use for the Chande Momentum Oscillator.
    */
-  private static final int CMO_PERIODS = 2;
+  private static final int CMO_PERIODS = 3;
 
   /**
    * The upper bound to use for the Chande Momentum Oscillator
    */
-  private static final int CMO_UPPER = 70;
+  private static final int CMO_UPPER = 50;
 
   /**
    * The lower bound to use for the Chande Momentum Oscillator
    */
-  private static final int CMO_LOWER = -70;
+  private static final int CMO_LOWER = -50;
 
   /**
    * The number of periods to use for the short running part of the MACD.
@@ -51,17 +51,17 @@ public class PrimaryStrategy implements StrategyBuilder {
   /**
    * The number of periods to use for the long running SMA.
    */
-  private static final int SMA_LONG_PERIODS = 200;
+  private static final int SMA_LONG_PERIODS = 10;
 
   /**
    * The number of periods to use for the short running EMA.
    */
-  private static final int EMA_SHORT_PERIODS = 9;
+  private static final int EMA_SHORT_PERIODS = 5;
 
   /**
    * The number of periods to use for the long running EMA.
    */
-  private static final int EMA_LONG_PERIODS = 26;
+  private static final int EMA_LONG_PERIODS = 10;
 
   /**
    * The threshold (in percent) for the maximum loss allowed on a given
@@ -93,7 +93,7 @@ public class PrimaryStrategy implements StrategyBuilder {
 
     // The bias is bearish when the shorter-moving average moves below the
     // longer moving average.
-    EMAIndicator shortEma = new EMAIndicator(closePrice, EMA_SHORT_PERIODS);
+    ZLEMAIndicator shortEma = new ZLEMAIndicator(closePrice, EMA_SHORT_PERIODS);
     EMAIndicator longEma = new EMAIndicator(closePrice, EMA_LONG_PERIODS);
 
     StochasticOscillatorKIndicator stochasticOscillK = new
@@ -105,8 +105,7 @@ public class PrimaryStrategy implements StrategyBuilder {
 
     Rule momentumEntry = new OverIndicatorRule(shortSma, longSma) // Trend
         // Signal 1
-        .and(new CrossedDownIndicatorRule(cmo,
-            Decimal.valueOf(CMO_LOWER)))
+        .and(new CrossedDownIndicatorRule(cmo, Decimal.valueOf(CMO_LOWER)))
         // Signal 2
         .and(new OverIndicatorRule(shortEma, closePrice));
 
@@ -120,8 +119,7 @@ public class PrimaryStrategy implements StrategyBuilder {
 
     Rule momentumExit = new UnderIndicatorRule(shortSma, longSma) // Trend
         // Signal 1
-        .and(new CrossedUpIndicatorRule(cmo,
-            Decimal.valueOf(CMO_UPPER)))
+        .and(new CrossedUpIndicatorRule(cmo, Decimal.valueOf(CMO_UPPER)))
         // Signal 2
         .and(new UnderIndicatorRule(shortSma, closePrice));
 
