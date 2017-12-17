@@ -5,9 +5,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gy.jk.backtest.Annotations.ExchangeFixedFee;
 import gy.jk.backtest.Annotations.ExchangePercentFee;
-import gy.jk.strategy.PrimaryStrategy;
-import gy.jk.strategy.RSIStrategy;
-import gy.jk.strategy.StrategyBuilder;
+import gy.jk.strategy.*;
 
 public class BacktestModule extends AbstractModule {
 
@@ -21,6 +19,12 @@ public class BacktestModule extends AbstractModule {
         break;
       case "rsi":
         bind(StrategyBuilder.class).to(RSIStrategy.class);
+        break;
+      case "globalExtrema":
+        bind(StrategyBuilder.class).to(GlobalExtremaStrategy.class);
+        break;
+      case "cciCorrection":
+        bind(StrategyBuilder.class).to(CCICorrectionStrategy.class);
         break;
     }
     bindConstant().annotatedWith(ExchangePercentFee.class)

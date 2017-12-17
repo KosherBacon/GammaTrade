@@ -47,7 +47,7 @@ public class BacktestDataLoader {
       LOG.info("Loading backtest data from krakenUSD.csv.");
 
       InputStream stream =
-          BacktestDataLoader.class.getResourceAsStream("/data/krakenUSD3.csv");
+          BacktestDataLoader.class.getResourceAsStream("/data/krakenUSD1.csv");
       CSVReader csvReader = null;
       List<String[]> lines = new ArrayList<>();
 
@@ -138,7 +138,7 @@ public class BacktestDataLoader {
     do {
       tickEndTime = tickEndTime.plus(tickDuration);
       emptyTicks.add(new BaseTick(tickDuration, tickEndTime));
-    } while (tickEndTime.isBefore(endTime));
+    } while (!tickEndTime.isAfter(endTime));
 
     return emptyTicks;
   }

@@ -24,11 +24,14 @@ java_library(
 java_library(
     name = "strategy",
     srcs = [
+        "CCICorrectionStrategy.java",
+        "GlobalExtremaStrategy.java",
         "PrimaryStrategy.java",
         "RSIStrategy.java",
     ],
     deps = [
         "strategy_builder",
+        "//src/main/java/gy/jk/tick:annotations",
         "@guice//:compile",
         "@ta4j//:compile",
     ],
