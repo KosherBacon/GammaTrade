@@ -123,9 +123,16 @@ public class Trader {
     });
   }
 
+  /**
+   * Transform an amount of counter currency to a base currency amount. Uses a configurable amount,
+   * AMOUNT_KEEP, to ensure we actually have enough counter currency for our order.
+   *
+   * @param counterBalance How much counter currency we have in our account.
+   * @return The amount of base currency we would like to buy.
+   */
   private ListenableFuture<BigDecimal> getBuyableAmount(
       ListenableFuture<BigDecimal> counterBalance) {
-    // Counter * COUNTER_KEEP / lastTick
+    // Counter * AMOUNT_KEEP / lastTick
     return Futures.transformAsync(counterBalance, amount ->
         Futures.immediateFuture(
             amount.multiply(COUNTER_KEEP, MATH_CONTEXT).divide(tickClose, MATH_CONTEXT)));
@@ -140,7 +147,8 @@ public class Trader {
 
     ListenableFuture<BigDecimal> baseBalance = tradingApi.getAvailableBalance(currencyPair.base);
     ListenableFuture<String> tradeId = Futures.transformAsync(baseBalance, amount ->
-        tradingApi.createMarketOrder(OrderType.ASK, currencyPair, amount.min(maximumOrderSize)));
+        tradingApi.createMarketOrder(OrderType.ASK, currencyPair,
+            amount.multiply(COUNTER_KEEP, MATH_CONTEXT).min(maximumOrderSize)));
     tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
 
     Futures.addCallback(tradeId, new FutureCallback<String>() {
