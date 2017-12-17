@@ -26,6 +26,7 @@ java_library(
     srcs = [
         "CCICorrectionStrategy.java",
         "GlobalExtremaStrategy.java",
+        "KurtStrategy.java",
         "PrimaryStrategy.java",
         "RSIStrategy.java",
     ],
