@@ -13,9 +13,9 @@ java_library(
         "@guava//jar",
         "@guice//:compile",
         "@log4j//:compile",
-        "@xchange_bitstamp//:compile",
         "@xchange_core//jar",
         "@xchange_gdax//:compile",
+        "@xchange_gemini//:compile",
         "@xchange_stream_core//:compile",
     ],
 )
@@ -73,9 +73,9 @@ java_library(
         "trading_impl",
         "@config//jar",
         "@guice//:compile",
-        "@xchange_bitstamp//:compile",
         "@xchange_core//jar",
         "@xchange_gdax//:compile",
+        "@xchange_gemini//:compile",
         "@xchange_stream_core//:compile",
     ],
     resources = [

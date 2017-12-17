@@ -121,17 +121,18 @@ load("@xchange_gdax//:rules.bzl", "xchange_gdax_runtime", "xchange_gdax_default"
 xchange_gdax_default()
 
 maven_repository(
-    name = 'xchange_bitstamp',
+    name = 'xchange_gemini',
     deps = [
-        'info.bitrich.xchange-stream:xchange-bitstamp:4.3.0',
+        'info.bitrich.xchange-stream:xchange-gemini:4.3.0',
         'org.slf4j:slf4j-simple:1.7.25',
     ],
     force = [
         'org.slf4j:slf4j-api:1.7.25',
+        'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     ],
 )
-load("@xchange_bitstamp//:rules.bzl", "xchange_bitstamp_runtime", "xchange_bitstamp_default")
-xchange_bitstamp_default()
+load("@xchange_gemini//:rules.bzl", "xchange_gemini_runtime", "xchange_gemini_default")
+xchange_gemini_default()
 
 maven_repository(
     name = 'xchange_stream_core',

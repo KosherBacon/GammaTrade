@@ -26,30 +26,27 @@ public class ExchangeConnector {
   private final Table<StreamingExchange, CurrencyPair, Disposable> disposableTable =
       HashBasedTable.create();
 
-  private final List<StreamingExchange> exchanges;
+  private final StreamingExchange exchange;
   private final long exchangeConnectionTimeout;
   private final TradeReceiver tradeReceiver;
 
   @Inject
-  ExchangeConnector(
-      @StreamingExchangeList List<StreamingExchange> exchanges,
+  ExchangeConnector(StreamingExchange exchange,
       @ExchangeConnectionTimeout long exchangeConnectionTimeout,
       TradeReceiver tradeReceiver) {
-    this.exchanges = exchanges;
+    this.exchange = exchange;
     this.exchangeConnectionTimeout = exchangeConnectionTimeout;
     this.tradeReceiver = tradeReceiver;
   }
 
   public void connectAndSubscribeAll() throws UncheckedTimeoutException {
-    exchanges.forEach(exchange -> {
-      Throwable connect =
-          exchange.connect().blockingGet(exchangeConnectionTimeout, TimeUnit.MILLISECONDS);
-      if (connect != null) {
-        throw new UncheckedTimeoutException(connect);
-      }
-      StreamingMarketDataService marketDataService = exchange.getStreamingMarketDataService();
-      subscribeFeed(exchange, marketDataService);
-    });
+    Throwable connect =
+        exchange.connect().blockingGet(exchangeConnectionTimeout, TimeUnit.MILLISECONDS);
+    if (connect != null) {
+      throw new UncheckedTimeoutException(connect);
+    }
+    StreamingMarketDataService marketDataService = exchange.getStreamingMarketDataService();
+    subscribeFeed(exchange, marketDataService);
   }
 
   private void subscribeFeed(StreamingExchange exchange,
@@ -85,7 +82,7 @@ public class ExchangeConnector {
 
   public void disconnectAll() {
     disposableTable.values().forEach(Disposable::dispose);
-    exchanges.forEach(StreamingExchange::disconnect);
+    exchange.disconnect();
   }
 
 }

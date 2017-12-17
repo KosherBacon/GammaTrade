@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class Annotations {
   @BindingAnnotation
   @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
-  public @interface BitstampExchange {}
+  public @interface GeminiStreamingExchange {}
 
   @BindingAnnotation
   @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
