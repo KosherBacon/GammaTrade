@@ -123,10 +123,13 @@ xchange_gdax_default()
 maven_repository(
     name = 'xchange_gemini',
     deps = [
+        'org.knowm.xchange:xchange-gemini:4.3.1',
         'info.bitrich.xchange-stream:xchange-gemini:4.3.0',
         'org.slf4j:slf4j-simple:1.7.25',
     ],
     force = [
+        'org.knowm.xchange:xchange-gemini:4.3.1',
+        'org.knowm.xchange:xchange-core:4.3.1',
         'org.slf4j:slf4j-api:1.7.25',
         'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     ],
