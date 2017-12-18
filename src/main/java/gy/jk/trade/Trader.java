@@ -175,7 +175,7 @@ public class Trader {
       if (amount == null) {
         throw new NullPointerException("amount was null");
       }
-      BigDecimal toSell = amount.multiply(COUNTER_KEEP, BTC_CONTEXT).min(maximumOrderSize);
+      BigDecimal toSell = amount.min(maximumOrderSize).round(BTC_CONTEXT);
       LOG.info("Selling {} {}", amount, currencyPair.base.toString());
       return tradingApi.createMarketOrder(OrderType.ASK, currencyPair, toSell);
     });
