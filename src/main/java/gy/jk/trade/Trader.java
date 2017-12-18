@@ -73,7 +73,7 @@ public class Trader {
       if (usdBalance.compareTo(btcBalance) < 0) {
         lastOrder.type = OrderType.BID;
       } else {
-        lastOrder.type = OrderType.BID;
+        lastOrder.type = OrderType.ASK;
       }
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
