@@ -7,7 +7,11 @@ java_library(
     ],
     deps = [
         "annotations",
+        "@config//jar",
         "@guice//:compile"
+    ],
+    resources = [
+        "//src/main/resources:application",
     ],
 )
 
