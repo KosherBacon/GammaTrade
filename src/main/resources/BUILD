@@ -31,6 +31,7 @@ filegroup(
 filegroup(
     name = "logger",
     srcs = [
+        "log4j2.xml",
         "simplelogger.properties",
     ]
 )
