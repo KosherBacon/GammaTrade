@@ -71,9 +71,9 @@ public class Trader {
       BigDecimal btcBalance = tradingApi.getAvailableBalance(Currency.BTC).get();
       lastOrder = new OrderState();
       if (usdBalance.compareTo(btcBalance) < 0) {
-        lastOrder.type = OrderType.BID;
+        lastOrder.type = OrderType.BID; // BID = Buy
       } else {
-        lastOrder.type = OrderType.ASK;
+        lastOrder.type = OrderType.ASK; // ASK = Sell
       }
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
