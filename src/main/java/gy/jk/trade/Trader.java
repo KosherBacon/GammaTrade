@@ -66,14 +66,18 @@ public class Trader {
     this.lastOrder = null;
     this.tickClose = null;
 
+    LOG.info("Using strategy: {}", strategyBuilder.getClass().getSimpleName());
+
     try {
       BigDecimal usdBalance = tradingApi.getAvailableBalance(Currency.USD).get();
       BigDecimal btcBalance = tradingApi.getAvailableBalance(Currency.BTC).get();
       lastOrder = new OrderState();
       if (usdBalance.compareTo(btcBalance) < 0) {
         lastOrder.type = OrderType.BID; // BID = Buy
+        LOG.info("Last order was BUY!");
       } else {
         lastOrder.type = OrderType.ASK; // ASK = Sell
+        LOG.info("Last order was SELL!");
       }
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
