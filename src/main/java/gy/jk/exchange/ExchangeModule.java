@@ -60,11 +60,8 @@ public class ExchangeModule extends AbstractModule {
         bind(TradingApi.class).to(GdaxTradingEngine.class);
     }
 
-    /*
-     * Bindings for GdaxTradingEngine.
-     */
-
     bindConstant().annotatedWith(ExchangeConnectionTimeout.class).to(3000L);
-    bindConstant().annotatedWith(LiveTrading.class).to(false);
+    bindConstant().annotatedWith(LiveTrading.class)
+        .to(APPLICATION_CONFIG.getBoolean("trading.live"));
   }
 }
