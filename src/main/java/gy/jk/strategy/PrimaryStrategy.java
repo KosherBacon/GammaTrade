@@ -3,7 +3,8 @@ package gy.jk.strategy;
 import com.google.inject.Inject;
 import org.ta4j.core.*;
 import org.ta4j.core.indicators.*;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
+import org.ta4j.core.indicators.helpers.*;
+import org.ta4j.core.indicators.volume.NVIIndicator;
 import org.ta4j.core.trading.rules.*;
 
 public class PrimaryStrategy implements StrategyBuilder {
@@ -77,6 +78,8 @@ public class PrimaryStrategy implements StrategyBuilder {
    */
   private static final int STOP_GAIN_THRESHOLD = 10;
 
+  private static final int NUM_TICKS = 60;
+
   @Inject
   PrimaryStrategy() {
   }
@@ -103,6 +106,25 @@ public class PrimaryStrategy implements StrategyBuilder {
         MACD_LONG_PERIODS);
     EMAIndicator emaMacd = new EMAIndicator(macd, MACD_EMA_PERIODS);
 
+    NVIIndicator nviIndicator = new NVIIndicator(timeSeries);
+    Rule nviEntryRule = new OverIndicatorRule(nviIndicator, longEma);
+
+    // Getting the max price over the past hour
+    MaxPriceIndicator maxPrices = new MaxPriceIndicator(timeSeries);
+    HighestValueIndicator hourMaxPrice = new HighestValueIndicator(maxPrices, NUM_TICKS);
+    // Getting the min price over the past hour
+    MinPriceIndicator minPrices = new MinPriceIndicator(timeSeries);
+    LowestValueIndicator hourMinPrice = new LowestValueIndicator(minPrices, NUM_TICKS);
+
+    // Going long if the close price goes below the min price
+    MultiplierIndicator downWeek = new MultiplierIndicator(hourMinPrice, Decimal.valueOf("1.004"));
+    Rule buyingRule = new UnderIndicatorRule(closePrice, downWeek);
+
+    // Going short if the close price goes above the max price
+    MultiplierIndicator upWeek = new MultiplierIndicator(hourMaxPrice, Decimal.valueOf("0.996"));
+    Rule sellingRule = new OverIndicatorRule(closePrice, upWeek)
+        .or(new StopLossRule(closePrice, Decimal.valueOf(2)));
+
     Rule momentumEntry = new OverIndicatorRule(shortSma, longSma) // Trend
         // Signal 1
         .and(new CrossedDownIndicatorRule(cmo, Decimal.valueOf(CMO_LOWER)))
@@ -115,7 +137,8 @@ public class PrimaryStrategy implements StrategyBuilder {
             Decimal.valueOf(20)))
         // Signal 2
         .and(new OverIndicatorRule(macd, emaMacd))
-        .or(momentumEntry);
+        .or(momentumEntry.and(nviEntryRule))
+        .or(buyingRule);
 
     Rule momentumExit = new UnderIndicatorRule(shortSma, longSma) // Trend
         // Signal 1
@@ -131,6 +154,7 @@ public class PrimaryStrategy implements StrategyBuilder {
         // Signal 2
         .and(new UnderIndicatorRule(macd, emaMacd))
         .or(momentumExit)
+        .or(sellingRule)
         // Protect against severe losses
         .or(new StopLossRule(closePrice, Decimal.valueOf
             (STOP_LOSS_THRESHOLD)))
