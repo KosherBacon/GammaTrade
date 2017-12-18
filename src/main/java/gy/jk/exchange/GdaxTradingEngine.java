@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 
 public class GdaxTradingEngine implements TradingApi {
 
-  private static Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LogManager.getLogger();
 
   private final ListeningScheduledExecutorService executorService;
   private final TradeService tradeService;
