@@ -58,6 +58,7 @@ java_library(
         "//src/main/java/gy/jk/email:email",
         "@guava//jar",
         "@guice//:compile",
+        "@log4j//:compile",
         "@ta4j//:compile",
         "@xchange_gdax//:compile"
     ],

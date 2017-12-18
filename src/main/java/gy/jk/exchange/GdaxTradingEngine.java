@@ -6,6 +6,8 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import gy.jk.email.Emailer;
 import gy.jk.exchange.Annotations.LiveTrading;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
@@ -19,6 +21,8 @@ import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamCurre
 import java.math.BigDecimal;
 
 public class GdaxTradingEngine implements TradingApi {
+
+  private static Logger LOG = LogManager.getLogger();
 
   private final ListeningScheduledExecutorService executorService;
   private final TradeService tradeService;
@@ -34,6 +38,10 @@ public class GdaxTradingEngine implements TradingApi {
     this.accountService = accountService;
     this.liveTrading = liveTrading;
     this.emailer = emailer;
+
+    if (liveTrading) {
+      LOG.info("Live trading is enabled!");
+    }
   }
 
   @Override
