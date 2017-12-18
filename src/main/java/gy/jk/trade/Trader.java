@@ -12,6 +12,7 @@ import gy.jk.trade.Annotations.MaximumOrderSize;
 import gy.jk.trade.Annotations.TradeStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
 import org.ta4j.core.Decimal;
@@ -21,6 +22,8 @@ import org.ta4j.core.TimeSeries;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,6 +34,8 @@ public class Trader {
   private static final Logger LOG = LogManager.getLogger();
 
   private static final MathContext MATH_CONTEXT = Decimal.MATH_CONTEXT;
+  private static final MathContext USD_CONTEXT = new MathContext(2, RoundingMode.DOWN);
+  private static final MathContext BTC_CONTEXT = new MathContext(8, RoundingMode.DOWN);
   private static final BigDecimal COUNTER_KEEP = new BigDecimal("0.95", MATH_CONTEXT);
 
   private final Strategy strategy;
@@ -44,8 +49,11 @@ public class Trader {
   private BigDecimal tickClose;
 
   @Inject
-  Trader(@TradeStrategy StrategyBuilder strategyBuilder, TimeSeries timeSeries,
-      TradingApi tradingApi, CurrencyPair currencyPair, ListeningScheduledExecutorService executorService,
+  Trader(@TradeStrategy StrategyBuilder strategyBuilder,
+      TimeSeries timeSeries,
+      TradingApi tradingApi,
+      CurrencyPair currencyPair,
+      ListeningScheduledExecutorService executorService,
       @MaximumOrderSize BigDecimal maximumOrderSize) {
     this.strategy = strategyBuilder.buildStrategy(timeSeries);
 
@@ -57,6 +65,19 @@ public class Trader {
 
     this.lastOrder = null;
     this.tickClose = null;
+
+    try {
+      BigDecimal usdBalance = tradingApi.getAvailableBalance(Currency.USD).get();
+      BigDecimal btcBalance = tradingApi.getAvailableBalance(Currency.BTC).get();
+      lastOrder = new OrderState();
+      if (usdBalance.compareTo(btcBalance) < 0) {
+        lastOrder.type = OrderType.BID;
+      } else {
+        lastOrder.type = OrderType.BID;
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
   }
 
   public synchronized void receiveAndProcessTick(Tick tick) {
@@ -77,7 +98,6 @@ public class Trader {
     int endIndex = timeSeries.getEndIndex();
     if (strategy.shouldEnter(endIndex)) {
       LOG.info("Strategy indicates BUY.");
-      // TODO - Implement buy logic.
       if (lastOrder.type == OrderType.ASK || lastOrder.type == null) {
         executeBuy();
       } else {
@@ -85,7 +105,6 @@ public class Trader {
       }
     } else if (strategy.shouldExit(endIndex)) {
       LOG.info("Strategy indicates SELL.");
-      // TODO - Implement sell logic.
       if (lastOrder.type == OrderType.BID || lastOrder.type == null) {
         executeSell();
       } else {
@@ -106,9 +125,15 @@ public class Trader {
     // Get the amount of available USD in the account.
     ListenableFuture<BigDecimal> counterBalance =
         tradingApi.getAvailableBalance(currencyPair.counter);
-    ListenableFuture<BigDecimal> buyableAmount = getBuyableAmount(counterBalance);
-    ListenableFuture<String> tradeId = Futures.transformAsync(buyableAmount, amount ->
-        tradingApi.createMarketOrder(OrderType.BID, currencyPair, amount.min(maximumOrderSize)));
+    ListenableFuture<String> tradeId = Futures.transformAsync(counterBalance, amount -> {
+      if (amount == null) {
+        throw new NullPointerException("amount was null");
+      }
+      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, USD_CONTEXT).min(maximumOrderSize);
+      LOG.info("Buying {} {} of {}", amount, currencyPair.counter.toString(),
+          currencyPair.base.toString());
+      return tradingApi.createMarketOrder(OrderType.BID, currencyPair, toBuy);
+    });
     tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
 
     Futures.addCallback(tradeId, new FutureCallback<String>() {
@@ -146,9 +171,14 @@ public class Trader {
     lastOrder.type = OrderType.ASK;
 
     ListenableFuture<BigDecimal> baseBalance = tradingApi.getAvailableBalance(currencyPair.base);
-    ListenableFuture<String> tradeId = Futures.transformAsync(baseBalance, amount ->
-        tradingApi.createMarketOrder(OrderType.ASK, currencyPair,
-            amount.multiply(COUNTER_KEEP, MATH_CONTEXT).min(maximumOrderSize)));
+    ListenableFuture<String> tradeId = Futures.transformAsync(baseBalance, amount -> {
+      if (amount == null) {
+        throw new NullPointerException("amount was null");
+      }
+      BigDecimal toSell = amount.multiply(COUNTER_KEEP, BTC_CONTEXT).min(maximumOrderSize);
+      LOG.info("Selling {} {}", amount, currencyPair.base.toString());
+      return tradingApi.createMarketOrder(OrderType.ASK, currencyPair, toSell);
+    });
     tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
 
     Futures.addCallback(tradeId, new FutureCallback<String>() {
