@@ -2,7 +2,7 @@ package gy.jk.exchange;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import gy.jk.email.Emailer;
 import gy.jk.exchange.Annotations.LiveTrading;
@@ -20,14 +20,14 @@ import java.math.BigDecimal;
 
 public class GdaxTradingEngine implements TradingApi {
 
-  private final ListeningExecutorService executorService;
+  private final ListeningScheduledExecutorService executorService;
   private final TradeService tradeService;
   private final AccountService accountService;
   private final boolean liveTrading;
   private final Emailer emailer;
 
   @Inject
-  GdaxTradingEngine(ListeningExecutorService executorService, TradeService tradeService,
+  GdaxTradingEngine(ListeningScheduledExecutorService executorService, TradeService tradeService,
       AccountService accountService, @LiveTrading boolean liveTrading, Emailer emailer) {
     this.executorService = executorService;
     this.tradeService = tradeService;

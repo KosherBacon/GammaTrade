@@ -9,6 +9,7 @@ java_library(
         "annotations",
         "//proto:shared_java_proto",
         "//src/main/java/gy/jk/datarecorder:trade_receiver",
+        "//src/main/java/gy/jk/email:email",
         "//src/main/java/gy/jk/util:util",
         "@guava//jar",
         "@guice//:compile",

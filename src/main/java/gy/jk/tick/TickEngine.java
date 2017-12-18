@@ -1,33 +1,36 @@
 package gy.jk.tick;
 
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import gy.jk.proto.Shared.Trade;
 import gy.jk.tick.Annotations.TickLengthMillis;
 import gy.jk.trade.Trader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ta4j.core.BaseTick;
+import org.ta4j.core.Decimal;
 import org.ta4j.core.Tick;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class TickEngine {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TickEngine.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final long tickLengthMillis;
-  private final ScheduledExecutorService executorService;
+  private final ListeningScheduledExecutorService executorService;
   private final Trader trader;
 
   private Tick currentTick;
   private ZonedDateTime lastTickEnd;
 
   @Inject
-  TickEngine(@TickLengthMillis long tickLengthMillis, ScheduledExecutorService executorService,
+  TickEngine(@TickLengthMillis long tickLengthMillis,
+      ListeningScheduledExecutorService executorService,
       Trader trader) {
     this.tickLengthMillis = tickLengthMillis;
     this.executorService = executorService;
@@ -52,8 +55,13 @@ public class TickEngine {
   }
 
   private synchronized void fireTick() {
+    // If there are no trades within the tick, these will be null.
+    // Use an Optional to prevent a NullPointerException.
+    Optional<Decimal> closePrice = Optional.ofNullable(currentTick.getClosePrice());
+    Optional<Decimal> volume = Optional.ofNullable(currentTick.getVolume());
+
     LOG.info("Last Tick Close: {} | Volume: {}",
-        currentTick.getClosePrice().toDouble(), currentTick.getVolume());
+        closePrice.map(Decimal::toString).orElse("NaN"), volume.orElse(Decimal.ZERO));
     Tick tick = currentTick;
     executorService.submit(() -> trader.receiveAndProcessTick(tick));
     createNewTick();
@@ -64,7 +72,12 @@ public class TickEngine {
       lastTickEnd = ZonedDateTime.now();
     }
     lastTickEnd = lastTickEnd.plus(tickLengthMillis, ChronoUnit.MILLIS);
-    currentTick = new BaseTick(Duration.ofMillis(tickLengthMillis), lastTickEnd);
+    try {
+      Duration duration = Duration.ofMillis(tickLengthMillis);
+      currentTick = new BaseTick(duration, lastTickEnd);
+    } catch (NullPointerException e) {
+      e.printStackTrace();
+    }
   }
 
 }

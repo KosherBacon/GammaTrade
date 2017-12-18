@@ -56,7 +56,13 @@ email_default()
 maven_repository(
     name = 'log4j',
     deps = [
-        'org.slf4j:slf4j-simple:1.7.25',
+        'org.apache.logging.log4j:log4j-slf4j-impl:2.10.0',
+    ],
+    transitive_deps = [
+        'fec5797a55b786184a537abd39c3fa1449d752d6:org.apache.logging.log4j:log4j-api:2.10.0',
+        'c90b597163cd28ab6d9687edd53db601b6ea75a1:org.apache.logging.log4j:log4j-core:2.10.0',
+        '8e4e0a30736175e31c7f714d95032c1734cfbdea:org.apache.logging.log4j:log4j-slf4j-impl:2.10.0',
+        '34fa1d87256bbdb376ae7f6fa7e479610cd07dce:org.slf4j:slf4j-api:1.8.0-alpha2',
     ],
 )
 load("@log4j//:rules.bzl", "log4j_runtime", "log4j_default")
@@ -86,11 +92,9 @@ maven_repository(
     name = 'ta4j',
     deps = [
         'org.ta4j:ta4j-core:0.10',
-        'org.slf4j:slf4j-simple:1.7.25',
     ],
     transitive_deps = [
         'da76ca59f6a57ee3102f8f9bd9cee742973efa8a:org.slf4j:slf4j-api:1.7.25',
-        '8dacf9514f0c707cbbcdd6fd699e8940d42fb54e:org.slf4j:slf4j-simple:1.7.25',
         '3152443539a191024e924e38eaa2588a0c1e9b95:org.ta4j:ta4j-core:0.10',
     ],
 )
@@ -108,7 +112,6 @@ maven_repository(
     deps = [
         'org.knowm.xchange:xchange-gdax:4.3.1',
         'info.bitrich.xchange-stream:xchange-gdax:4.3.0',
-        'org.slf4j:slf4j-simple:1.7.25',
     ],
     force = [
         'org.knowm.xchange:xchange-gdax:4.3.1',
@@ -125,7 +128,6 @@ maven_repository(
     deps = [
         'org.knowm.xchange:xchange-gemini:4.3.1',
         'info.bitrich.xchange-stream:xchange-gemini:4.3.0',
-        'org.slf4j:slf4j-simple:1.7.25',
     ],
     force = [
         'org.knowm.xchange:xchange-gemini:4.3.1',
@@ -141,7 +143,6 @@ maven_repository(
     name = 'xchange_stream_core',
     deps = [
         'info.bitrich.xchange-stream:xchange-stream-core:4.3.0',
-        'org.slf4j:slf4j-simple:1.7.25',
     ],
     force = [
         'org.slf4j:slf4j-api:1.7.25',

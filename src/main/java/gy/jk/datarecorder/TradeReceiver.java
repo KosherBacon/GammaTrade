@@ -18,7 +18,7 @@ public class TradeReceiver {
   }
 
   public void newTrade(Trade trade) {
-    dataStore.recordTrade(trade);
+//    dataStore.recordTrade(trade);
     tickEngine.receiveTrade(trade);
   }
 }

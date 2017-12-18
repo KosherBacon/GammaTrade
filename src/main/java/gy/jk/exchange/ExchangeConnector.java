@@ -5,21 +5,22 @@ import com.google.common.collect.Table;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import com.google.inject.Inject;
 import gy.jk.datarecorder.TradeReceiver;
+import gy.jk.email.Emailer;
 import gy.jk.exchange.Annotations.ExchangeConnectionTimeout;
 import gy.jk.proto.Shared;
 import gy.jk.proto.Shared.Trade;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import io.reactivex.disposables.Disposable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.knowm.xchange.currency.CurrencyPair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
 public class ExchangeConnector {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ExchangeConnector.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final Table<StreamingExchange, CurrencyPair, Disposable> disposableTable =
       HashBasedTable.create();
@@ -27,14 +28,16 @@ public class ExchangeConnector {
   private final StreamingExchange exchange;
   private final long exchangeConnectionTimeout;
   private final TradeReceiver tradeReceiver;
+  private final Emailer emailer;
 
   @Inject
   ExchangeConnector(StreamingExchange exchange,
-      @ExchangeConnectionTimeout long exchangeConnectionTimeout,
-      TradeReceiver tradeReceiver) {
+      @ExchangeConnectionTimeout long exchangeConnectionTimeout, TradeReceiver tradeReceiver,
+      Emailer emailer) {
     this.exchange = exchange;
     this.exchangeConnectionTimeout = exchangeConnectionTimeout;
     this.tradeReceiver = tradeReceiver;
+    this.emailer = emailer;
   }
 
   public void connectAndSubscribeAll() throws UncheckedTimeoutException {
@@ -74,6 +77,7 @@ public class ExchangeConnector {
         // Connection not open, PANIC.
         // Send email.
         LOG.error("Exchange disconnected unexpectedly!");
+        emailer.sendErrorEmail();
       }
     });
   }

@@ -4,15 +4,16 @@ import com.google.common.base.MoreObjects;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import gy.jk.exchange.TradingApi;
 import gy.jk.strategy.StrategyBuilder;
 import gy.jk.trade.Annotations.MaximumOrderSize;
 import gy.jk.trade.Annotations.TradeStrategy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ta4j.core.Decimal;
 import org.ta4j.core.Strategy;
 import org.ta4j.core.Tick;
@@ -20,7 +21,6 @@ import org.ta4j.core.TimeSeries;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Trader {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Trader.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private static final MathContext MATH_CONTEXT = Decimal.MATH_CONTEXT;
   private static final BigDecimal COUNTER_KEEP = new BigDecimal("0.95", MATH_CONTEXT);
@@ -37,7 +37,7 @@ public class Trader {
   private final TimeSeries timeSeries;
   private final TradingApi tradingApi;
   private final CurrencyPair currencyPair;
-  private final ScheduledExecutorService executorService;
+  private final ListeningScheduledExecutorService executorService;
   private final BigDecimal maximumOrderSize;
 
   private OrderState lastOrder;
@@ -45,7 +45,7 @@ public class Trader {
 
   @Inject
   Trader(@TradeStrategy StrategyBuilder strategyBuilder, TimeSeries timeSeries,
-      TradingApi tradingApi, CurrencyPair currencyPair, ScheduledExecutorService executorService,
+      TradingApi tradingApi, CurrencyPair currencyPair, ListeningScheduledExecutorService executorService,
       @MaximumOrderSize BigDecimal maximumOrderSize) {
     this.strategy = strategyBuilder.buildStrategy(timeSeries);
 

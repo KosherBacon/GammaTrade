@@ -1,17 +1,16 @@
 package gy.jk;
 
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gy.jk.datarecorder.DataRecorderModule;
-import gy.jk.datarecorder.TradeReceiver;
 import gy.jk.email.EmailModule;
 import gy.jk.exchange.ExchangeConnector;
 import gy.jk.exchange.ExchangeModule;
 import gy.jk.tick.TickModule;
 import gy.jk.trade.TradeModule;
 
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,7 +21,8 @@ public class GammaTrade {
   private final ExchangeConnector exchangeConnector;
 
   @Inject
-  GammaTrade(ScheduledExecutorService executorService, ExchangeConnector exchangeConnector) {
+  GammaTrade(ListeningScheduledExecutorService executorService,
+      ExchangeConnector exchangeConnector) {
     this.exchangeConnector = exchangeConnector;
 
     // Verify that we still have a connection to the exchange, do so every 10 seconds.
