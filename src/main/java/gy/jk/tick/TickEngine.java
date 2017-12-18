@@ -72,12 +72,8 @@ public class TickEngine {
       lastTickEnd = ZonedDateTime.now();
     }
     lastTickEnd = lastTickEnd.plus(tickLengthMillis, ChronoUnit.MILLIS);
-    try {
-      Duration duration = Duration.ofMillis(tickLengthMillis);
-      currentTick = new BaseTick(duration, lastTickEnd);
-    } catch (NullPointerException e) {
-      e.printStackTrace();
-    }
+    Duration duration = Duration.ofMillis(tickLengthMillis);
+    currentTick = new BaseTick(duration, lastTickEnd);
   }
 
 }
