@@ -1,7 +1,7 @@
 package gy.jk.backtest;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import com.opencsv.CSVReader;
 import gy.jk.tick.Annotations.TickLengthMillis;
@@ -31,11 +31,11 @@ public class BacktestDataLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(BacktestDataLoader.class);
 
-  private final ListeningExecutorService executorService;
+  private final ListeningScheduledExecutorService executorService;
   private final long tickLengthMillis;
 
   @Inject
-  BacktestDataLoader(ListeningExecutorService executorService,
+  BacktestDataLoader(ListeningScheduledExecutorService executorService,
       @TickLengthMillis long tickLengthMillis) {
     this.executorService = executorService;
     this.tickLengthMillis = tickLengthMillis;
