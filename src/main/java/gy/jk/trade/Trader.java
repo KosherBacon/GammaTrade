@@ -129,7 +129,7 @@ public class Trader {
       if (amount == null) {
         throw new NullPointerException("amount was null");
       }
-      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, USD_CONTEXT).min(maximumOrderSize);
+      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, USD_CONTEXT).min(tickClose);
       LOG.info("Buying {} {} of {}", amount, currencyPair.counter.toString(),
           currencyPair.base.toString());
       return tradingApi.createMarketOrder(OrderType.BID, currencyPair, toBuy);
