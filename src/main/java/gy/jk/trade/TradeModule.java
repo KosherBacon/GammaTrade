@@ -48,7 +48,7 @@ public class TradeModule extends AbstractModule {
         break;
     }
     bind(BigDecimal.class).annotatedWith(MaximumOrderSize.class).toInstance(MAXIMUM_ORDER_SIZE);
-    bind(CurrencyPair.class).toInstance(CurrencyPair.BTC_USD);
+    bind(CurrencyPair.class).toInstance(CurrencyPair.ETH_BTC);
     bind(TimeSeries.class).toInstance(GDAX_TIME_SERIES);
   }
 }
