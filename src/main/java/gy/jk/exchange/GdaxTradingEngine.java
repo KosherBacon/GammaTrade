@@ -45,7 +45,7 @@ public class GdaxTradingEngine implements TradingApi {
   }
 
   @Override
-  public ListenableFuture<String> createOrder(OrderType orderType, CurrencyPair currencyPair,
+  public ListenableFuture<String> createLimitOrder(OrderType orderType, CurrencyPair currencyPair,
       BigDecimal amount, BigDecimal price) {
     LimitOrder limitOrder = new LimitOrder.Builder(orderType, currencyPair)
         .limitPrice(price)

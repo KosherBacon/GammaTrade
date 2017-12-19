@@ -19,7 +19,7 @@ public interface TradingApi {
    * @param price What price to buy or sell at.
    * @return ListenableFuture for the order id.
    */
-  ListenableFuture<String> createOrder(OrderType orderType, CurrencyPair currencyPair, BigDecimal
+  ListenableFuture<String> createLimitOrder(OrderType orderType, CurrencyPair currencyPair, BigDecimal
       amount, BigDecimal price);
 
   ListenableFuture<OpenOrders> getOpenOrders(CurrencyPair currencyPair);
