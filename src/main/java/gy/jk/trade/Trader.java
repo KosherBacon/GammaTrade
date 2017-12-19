@@ -1,6 +1,7 @@
 package gy.jk.trade;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -33,9 +34,15 @@ public class Trader {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  // Map a currency to the amount of precision we have in the exchange (GDAX for now).
+  private static final ImmutableMap<Currency, MathContext> CURRENCY_CONTEXTS =
+      new ImmutableMap.Builder<Currency, MathContext>()
+          .put(Currency.USD, new MathContext(2, RoundingMode.DOWN))
+          .put(Currency.BTC, new MathContext(8, RoundingMode.DOWN))
+          .put(Currency.ETH, new MathContext(8, RoundingMode.DOWN))
+          .build();
+
   private static final MathContext MATH_CONTEXT = Decimal.MATH_CONTEXT;
-  private static final MathContext USD_CONTEXT = new MathContext(2, RoundingMode.DOWN);
-  private static final MathContext BTC_CONTEXT = new MathContext(8, RoundingMode.DOWN);
   private static final BigDecimal COUNTER_KEEP = new BigDecimal("0.95", MATH_CONTEXT);
 
   private final Strategy strategy;
@@ -133,7 +140,8 @@ public class Trader {
       if (amount == null) {
         throw new NullPointerException("amount was null");
       }
-      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, USD_CONTEXT).min(tickClose);
+      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, CURRENCY_CONTEXTS.get(currencyPair.counter))
+          .min(tickClose);
       LOG.info("Buying {} {} of {}", amount, currencyPair.counter.toString(),
           currencyPair.base.toString());
       return tradingApi.createMarketOrder(OrderType.BID, currencyPair, toBuy);
@@ -162,9 +170,13 @@ public class Trader {
   private ListenableFuture<BigDecimal> getBuyableAmount(
       ListenableFuture<BigDecimal> counterBalance) {
     // Counter * AMOUNT_KEEP / lastTick
-    return Futures.transformAsync(counterBalance, amount ->
-        Futures.immediateFuture(
-            amount.multiply(COUNTER_KEEP, MATH_CONTEXT).divide(tickClose, MATH_CONTEXT)));
+    return Futures.transformAsync(counterBalance, amount -> {
+      if (amount == null) {
+        throw new NullPointerException("amount was null");
+      }
+      return Futures.immediateFuture(
+          amount.multiply(COUNTER_KEEP, MATH_CONTEXT).divide(tickClose, MATH_CONTEXT));
+    });
   }
 
   /**
@@ -179,7 +191,8 @@ public class Trader {
       if (amount == null) {
         throw new NullPointerException("amount was null");
       }
-      BigDecimal toSell = amount.min(maximumOrderSize).round(BTC_CONTEXT);
+      BigDecimal toSell = amount.min(maximumOrderSize)
+          .round(CURRENCY_CONTEXTS.get(currencyPair.base));
       LOG.info("Selling {} {}", amount, currencyPair.base.toString());
       return tradingApi.createMarketOrder(OrderType.ASK, currencyPair, toSell);
     });
