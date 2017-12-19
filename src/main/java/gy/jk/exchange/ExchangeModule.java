@@ -12,6 +12,7 @@ import org.knowm.xchange.ExchangeSpecification;
 import org.knowm.xchange.gdax.GDAXExchange;
 import org.knowm.xchange.gemini.v1.GeminiExchange;
 import org.knowm.xchange.service.account.AccountService;
+import org.knowm.xchange.service.marketdata.MarketDataService;
 import org.knowm.xchange.service.trade.TradeService;
 
 public class ExchangeModule extends AbstractModule {
@@ -21,8 +22,6 @@ public class ExchangeModule extends AbstractModule {
 
   @Override
   protected void configure() {
-
-
     switch (APPLICATION_CONFIG.getString("exchange")) {
       case "gdax":
         Exchange gdaxExchange = ExchangeFactory.INSTANCE.createExchange(GDAXExchange.class.getName());
@@ -39,6 +38,7 @@ public class ExchangeModule extends AbstractModule {
 
         bind(TradeService.class).toInstance(gdaxExchange.getTradeService());
         bind(AccountService.class).toInstance(gdaxExchange.getAccountService());
+        bind(MarketDataService.class).toInstance(gdaxExchange.getMarketDataService());
         bind(StreamingExchange.class).toInstance(gdaxStreaming);
         bind(TradingApi.class).to(GdaxTradingEngine.class);
         break;
@@ -56,6 +56,7 @@ public class ExchangeModule extends AbstractModule {
 
         bind(TradeService.class).toInstance(geminiExchange.getTradeService());
         bind(AccountService.class).toInstance(geminiExchange.getAccountService());
+        bind(MarketDataService.class).toInstance(geminiExchange.getMarketDataService());
         bind(StreamingExchange.class).toInstance(geminiStreaming);
         bind(TradingApi.class).to(GdaxTradingEngine.class);
     }

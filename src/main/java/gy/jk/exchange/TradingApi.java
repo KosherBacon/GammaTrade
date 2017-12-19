@@ -29,6 +29,11 @@ public interface TradingApi {
 
   ListenableFuture<BigDecimal> getAvailableBalance(Currency currency);
 
+  ListenableFuture<BigDecimal> getBestPriceFromOrderBook(OrderType orderType, CurrencyPair
+      currencyPair);
+
+  ListenableFuture<Boolean> cancelAllOrders();
+
   /**
    * Gets the market name.
    * @return The market name.

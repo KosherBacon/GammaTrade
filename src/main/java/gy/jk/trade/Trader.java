@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
+import org.knowm.xchange.dto.trade.LimitOrder;
 import org.ta4j.core.Decimal;
 import org.ta4j.core.Strategy;
 import org.ta4j.core.Tick;
@@ -24,6 +25,7 @@ import org.ta4j.core.TimeSeries;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -109,18 +111,18 @@ public class Trader {
     int endIndex = timeSeries.getEndIndex();
     if (strategy.shouldEnter(endIndex)) {
       LOG.info("Strategy indicates BUY.");
-      if (lastOrder.type == OrderType.ASK || lastOrder.type == null) {
-        executeBuy();
-      } else {
-        LOG.info("Strategy indicated BUY with BUY as last trade.");
-      }
+//      if (lastOrder.type == OrderType.ASK || lastOrder.type == null) {
+      executeBuy();
+//      } else {
+//        LOG.info("Strategy indicated BUY with BUY as last trade.");
+//      }
     } else if (strategy.shouldExit(endIndex)) {
       LOG.info("Strategy indicates SELL.");
-      if (lastOrder.type == OrderType.BID || lastOrder.type == null) {
-        executeSell();
-      } else {
-        LOG.info("Strategy indicated SELL with SELL as last trade.");
-      }
+//      if (lastOrder.type == OrderType.BID || lastOrder.type == null) {
+      executeSell();
+//      } else {
+//        LOG.info("Strategy indicated SELL with SELL as last trade.");
+//      }
     } else {
       LOG.info("Strategy indicates WAIT.");
     }
@@ -133,20 +135,57 @@ public class Trader {
     LOG.info("Executing buy order on {}", tradingApi.getMarketName());
     lastOrder.type = OrderType.BID;
 
+    try {
+      List<LimitOrder> openOrders = tradingApi.getOpenOrders(currencyPair).get().getOpenOrders();
+
+      // If there are any remaining ASK orders we should cancel it and return.
+      if (openOrders.stream()
+          .anyMatch(order -> order.getType() == OrderType.ASK)) {
+        tradingApi.cancelAllOrders().get();
+        return;
+      } else if (openOrders.stream().anyMatch(order -> order.getType() == OrderType.BID)) {
+        // May have been outbid and should cancel and update.
+        tradingApi.cancelAllOrders().get();
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
+
     // Get the amount of available USD in the account.
     ListenableFuture<BigDecimal> counterBalance =
         tradingApi.getAvailableBalance(currencyPair.counter);
-    ListenableFuture<String> tradeId = Futures.transformAsync(counterBalance, amount -> {
-      if (amount == null) {
-        throw new NullPointerException("amount was null");
+
+    ListenableFuture<BigDecimal> bestPrice = tradingApi.getBestPriceFromOrderBook(OrderType.BID,
+        currencyPair);
+    ListenableFuture<List<BigDecimal>> data = Futures.allAsList(counterBalance, bestPrice);
+    ListenableFuture<BigDecimal> amountToBuy = Futures.transformAsync(data, values -> {
+      if (values == null) {
+        throw new NullPointerException("values was null");
       }
-      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, CURRENCY_CONTEXTS.get(currencyPair.counter))
-          .min(tickClose);
-      LOG.info("Buying {} {} of {}", amount, currencyPair.counter.toString(),
-          currencyPair.base.toString());
-      return tradingApi.createMarketOrder(OrderType.BID, currencyPair, toBuy);
+      return Futures.immediateFuture(values.get(0)
+          .divide(values.get(1), CURRENCY_CONTEXTS.get(currencyPair.base)));
     });
-    tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
+    data = Futures.allAsList(bestPrice, amountToBuy);
+    ListenableFuture<String> tradeId = Futures.transformAsync(data, values -> {
+      if (values == null) {
+        throw new NullPointerException("values was null");
+      }
+      BigDecimal price = values.get(0);
+      BigDecimal amount = values.get(1);
+      return tradingApi.createLimitOrder(OrderType.BID, currencyPair, amount, price);
+    });
+
+//    ListenableFuture<String> tradeId = Futures.transformAsync(counterBalance, amount -> {
+//      if (amount == null) {
+//        throw new NullPointerException("amount was null");
+//      }
+//      BigDecimal toBuy = amount.multiply(COUNTER_KEEP, CURRENCY_CONTEXTS.get(currencyPair.counter))
+//          .min(tickClose);
+//      LOG.info("Buying {} {} of {}", amount, currencyPair.counter.toString(),
+//          currencyPair.base.toString());
+//      return tradingApi.createMarketOrder(OrderType.BID, currencyPair, toBuy);
+//    });
+//    tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
 
     Futures.addCallback(tradeId, new FutureCallback<String>() {
       public void onSuccess(String orderId) {
@@ -161,41 +200,59 @@ public class Trader {
   }
 
   /**
-   * Transform an amount of counter currency to a base currency amount. Uses a configurable amount,
-   * AMOUNT_KEEP, to ensure we actually have enough counter currency for our order.
-   *
-   * @param counterBalance How much counter currency we have in our account.
-   * @return The amount of base currency we would like to buy.
-   */
-  private ListenableFuture<BigDecimal> getBuyableAmount(
-      ListenableFuture<BigDecimal> counterBalance) {
-    // Counter * AMOUNT_KEEP / lastTick
-    return Futures.transformAsync(counterBalance, amount -> {
-      if (amount == null) {
-        throw new NullPointerException("amount was null");
-      }
-      return Futures.immediateFuture(
-          amount.multiply(COUNTER_KEEP, MATH_CONTEXT).divide(tickClose, MATH_CONTEXT));
-    });
-  }
-
-  /**
    * Sell using the base currency, typically BTC.
    */
   private void executeSell() {
     LOG.info("Executing sell order on {}", tradingApi.getMarketName());
     lastOrder.type = OrderType.ASK;
 
-    ListenableFuture<BigDecimal> baseBalance = tradingApi.getAvailableBalance(currencyPair.base);
-    ListenableFuture<String> tradeId = Futures.transformAsync(baseBalance, amount -> {
-      if (amount == null) {
-        throw new NullPointerException("amount was null");
+    try {
+      List<LimitOrder> openOrders = tradingApi.getOpenOrders(currencyPair).get().getOpenOrders();
+
+      // If there are any remaining BID orders we should cancel it and return.
+      if (openOrders.stream()
+          .anyMatch(order -> order.getType() == OrderType.BID)) {
+        tradingApi.cancelAllOrders().get();
+        return;
+      } else if (openOrders.stream().anyMatch(order -> order.getType() == OrderType.ASK)) {
+        // May have been outbid and should cancel and update.
+        tradingApi.cancelAllOrders().get();
       }
-      BigDecimal toSell = amount.min(maximumOrderSize)
-          .round(CURRENCY_CONTEXTS.get(currencyPair.base));
-      LOG.info("Selling {} {}", amount, currencyPair.base.toString());
-      return tradingApi.createMarketOrder(OrderType.ASK, currencyPair, toSell);
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
+
+    ListenableFuture<BigDecimal> baseBalance = tradingApi.getAvailableBalance(currencyPair.base);
+
+    ListenableFuture<BigDecimal> bestPrice = tradingApi.getBestPriceFromOrderBook(OrderType.ASK,
+        currencyPair);
+    ListenableFuture<List<BigDecimal>> data = Futures.allAsList(baseBalance, bestPrice);
+    ListenableFuture<BigDecimal> amountToBuy = Futures.transformAsync(data, values -> {
+      if (values == null) {
+        throw new NullPointerException("values was null");
+      }
+      return Futures.immediateFuture(values.get(0)
+          .divide(values.get(1), CURRENCY_CONTEXTS.get(currencyPair.base)));
     });
+    data = Futures.allAsList(bestPrice, amountToBuy);
+    ListenableFuture<String> tradeId = Futures.transformAsync(data, values -> {
+      if (values == null) {
+        throw new NullPointerException("values was null");
+      }
+      BigDecimal price = values.get(0);
+      BigDecimal amount = values.get(1);
+      return tradingApi.createLimitOrder(OrderType.ASK, currencyPair, amount, price);
+    });
+
+//    ListenableFuture<String> tradeId = Futures.transformAsync(baseBalance, amount -> {
+//      if (amount == null) {
+//        throw new NullPointerException("amount was null");
+//      }
+//      BigDecimal toSell = amount.min(maximumOrderSize)
+//          .round(CURRENCY_CONTEXTS.get(currencyPair.base));
+//      LOG.info("Selling {} {}", amount, currencyPair.base.toString());
+//      return tradingApi.createMarketOrder(OrderType.ASK, currencyPair, toSell);
+//    });
     tradeId = Futures.withTimeout(tradeId, 1000, TimeUnit.MILLISECONDS, executorService);
 
     Futures.addCallback(tradeId, new FutureCallback<String>() {
