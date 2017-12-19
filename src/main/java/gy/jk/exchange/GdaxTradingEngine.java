@@ -47,6 +47,9 @@ public class GdaxTradingEngine implements TradingApi {
   @Override
   public ListenableFuture<String> createLimitOrder(OrderType orderType, CurrencyPair currencyPair,
       BigDecimal amount, BigDecimal price) {
+    if (!liveTrading) {
+      return Futures.immediateFuture("not-live-trade-id");
+    }
     LimitOrder limitOrder = new LimitOrder.Builder(orderType, currencyPair)
         .limitPrice(price)
         .cumulativeAmount(amount)
