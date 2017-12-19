@@ -23,7 +23,7 @@ public class TradeModule extends AbstractModule {
   protected void configure() {
     switch (TRADE_CONFIG.getString("strategy")) {
       case "primary":
-        bind(StrategyBuilder.class).annotatedWith(TradeStrategy.class).to(PrimaryStrategy.class);
+        bind(StrategyBuilder.class).to(PrimaryStrategy.class);
         break;
       case "rsi":
         bind(StrategyBuilder.class).to(RSIStrategy.class);

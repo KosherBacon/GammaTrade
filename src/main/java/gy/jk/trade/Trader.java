@@ -56,7 +56,7 @@ public class Trader {
   private BigDecimal tickClose;
 
   @Inject
-  Trader(@TradeStrategy StrategyBuilder strategyBuilder,
+  Trader(StrategyBuilder strategyBuilder,
       TimeSeries timeSeries,
       TradingApi tradingApi,
       CurrencyPair currencyPair,
