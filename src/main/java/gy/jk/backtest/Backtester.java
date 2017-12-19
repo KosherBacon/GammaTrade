@@ -11,7 +11,6 @@ import gy.jk.backtest.Annotations.ExchangeFixedFee;
 import gy.jk.backtest.Annotations.ExchangePercentFee;
 import gy.jk.proto.Shared.BacktestResult;
 import gy.jk.strategy.StrategyBuilder;
-import gy.jk.tick.TickModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ta4j.core.TimeSeries;
@@ -85,7 +84,7 @@ public class Backtester {
    */
   public static void main(String[] args) {
     Injector injector = Guice.createInjector(new BacktestModule(),
-        new BackendModule(), new TickModule());
+        new BackendModule());
     Backtester backtester = injector.getInstance(Backtester.class);
     ListenableFuture<BacktestResult> result = backtester.runBacktest();
     Futures.addCallback(result, new FutureCallback<BacktestResult>() {

@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory;
 import gy.jk.backtest.Annotations.ExchangeFixedFee;
 import gy.jk.backtest.Annotations.ExchangePercentFee;
 import gy.jk.strategy.*;
+import gy.jk.tick.Annotations.TickLengthMillis;
 
 public class BacktestModule extends AbstractModule {
 
@@ -32,7 +33,15 @@ public class BacktestModule extends AbstractModule {
       case "momentum":
         bind(StrategyBuilder.class).to(MomentumStrategy.class);
         break;
+      case "bollinger":
+        bind(StrategyBuilder.class).to(BollingerStrategy.class);
+        break;
+      case "honeyBadger":
+        bind(StrategyBuilder.class).to(HoneyBadgerStrategy.class);
+        break;
     }
+    bindConstant().annotatedWith(TickLengthMillis.class)
+        .to(BACKTEST_CONFIG.getLong("tickLength"));
     bindConstant().annotatedWith(ExchangePercentFee.class)
         .to(BACKTEST_CONFIG.getDouble("exchangePercentFee"));
     bindConstant().annotatedWith(ExchangeFixedFee.class)

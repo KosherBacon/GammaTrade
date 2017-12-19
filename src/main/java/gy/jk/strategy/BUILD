@@ -24,10 +24,12 @@ java_library(
 java_library(
     name = "strategy",
     srcs = [
-        "MomentumStrategy.java",
+        "BollingerStrategy.java",
         "CCICorrectionStrategy.java",
         "GlobalExtremaStrategy.java",
+        "HoneyBadgerStrategy.java",
         "KurtStrategy.java",
+        "MomentumStrategy.java",
         "PrimaryStrategy.java",
         "RSIStrategy.java",
     ],
