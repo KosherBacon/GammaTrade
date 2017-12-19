@@ -65,7 +65,7 @@ public class GdaxTradingEngine implements TradingApi {
     }
     LimitOrder limitOrder = new LimitOrder.Builder(orderType, currencyPair)
         .limitPrice(price)
-        .cumulativeAmount(amount)
+        .originalAmount(amount)
         .build();
     return executorService.submit(() -> tradeService.placeLimitOrder(limitOrder));
   }
