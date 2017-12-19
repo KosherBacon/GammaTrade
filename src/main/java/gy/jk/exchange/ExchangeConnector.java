@@ -28,15 +28,19 @@ public class ExchangeConnector {
   private final StreamingExchange exchange;
   private final long exchangeConnectionTimeout;
   private final TradeReceiver tradeReceiver;
+  private final CurrencyPair currencyPair;
   private final Emailer emailer;
 
   @Inject
   ExchangeConnector(StreamingExchange exchange,
-      @ExchangeConnectionTimeout long exchangeConnectionTimeout, TradeReceiver tradeReceiver,
+      @ExchangeConnectionTimeout long exchangeConnectionTimeout,
+      TradeReceiver tradeReceiver,
+      CurrencyPair currencyPair,
       Emailer emailer) {
     this.exchange = exchange;
     this.exchangeConnectionTimeout = exchangeConnectionTimeout;
     this.tradeReceiver = tradeReceiver;
+    this.currencyPair = currencyPair;
     this.emailer = emailer;
   }
 
@@ -53,14 +57,14 @@ public class ExchangeConnector {
   private void subscribeFeed(StreamingExchange exchange,
       StreamingMarketDataService dataService) {
     LOG.info("Initializing: {}", dataService.getClass().getName());
-    Disposable disposable = dataService.getTrades(CurrencyPair.BTC_USD)
+    Disposable disposable = dataService.getTrades(currencyPair)
         .subscribe(tradeFromFeed -> {
           try {
             Trade trade = Trade.newBuilder()
                 .setExchange(Shared.Exchange.newBuilder().setName(Shared.Exchange.Name.GDAX))
                 .setPrice(tradeFromFeed.getPrice().doubleValue())
                 .setSize(tradeFromFeed.getOriginalAmount().doubleValue())
-                .setCurrencyPair(Trade.CurrencyPair.BTC_USD)
+                .setCurrencyPair(Trade.CurrencyPair.ETH_BTC)
                 .setId(tradeFromFeed.getId())
                 .build();
             tradeReceiver.newTrade(trade);
@@ -68,7 +72,7 @@ public class ExchangeConnector {
             LOG.error("Received data that shouldn't be NULL from exchange.", e);
           }
     });
-    disposableTable.put(exchange, CurrencyPair.BTC_USD, disposable);
+    disposableTable.put(exchange, currencyPair, disposable);
   }
 
   public void verifyConnection() {
