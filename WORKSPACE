@@ -27,8 +27,8 @@ guice_compile()
 
 maven_jar(
     name = "guava",
-    artifact = "com.google.guava:guava:18.0",
-    sha1 = "cce0823396aa693798f8882e64213b1772032b09",
+    artifact = "com.google.guava:guava:23.0",
+    sha1 = "c947004bb13d18182be60077ade044099e4f26f1",
 )
 
 maven_jar(
