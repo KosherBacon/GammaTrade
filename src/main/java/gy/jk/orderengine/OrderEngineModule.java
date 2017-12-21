@@ -11,7 +11,7 @@ public class OrderEngineModule extends AbstractModule {
   @Override
   protected void configure() {
     if (TRADE_CONFIG.getBoolean("trading.limitOrders")) {
-      bind(OrderEngine.class).to(LimitOrderEngine.class);
+      bind(OrderEngine.class).to(LimitOrderAsyncEngine.class);
     } else {
       bind(OrderEngine.class).to(MarketOrderEngine.class);
     }

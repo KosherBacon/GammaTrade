@@ -14,7 +14,7 @@ java_library(
 java_library(
     name = "orderengine_impl",
     srcs = [
-        "LimitOrderEngine.java",
+        "LimitOrderAsyncEngine.java",
         "MarketOrderEngine.java",
     ],
     deps = [

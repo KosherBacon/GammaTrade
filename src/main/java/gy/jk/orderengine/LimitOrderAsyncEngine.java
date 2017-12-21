@@ -37,7 +37,7 @@ import java.util.Optional;
  * always be at most one order in the exchange
  * at any time.
  */
-public class LimitOrderEngine extends OrderEngine {
+public class LimitOrderAsyncEngine extends OrderEngine {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -47,7 +47,7 @@ public class LimitOrderEngine extends OrderEngine {
   private final boolean liveTrading;
 
   @Inject
-  public LimitOrderEngine(ListeningExecutorService executorService,
+  public LimitOrderAsyncEngine(ListeningExecutorService executorService,
       TradingApi tradingApi,
       CurrencyPair currencyPair,
       @LiveTrading boolean liveTrading) {
@@ -82,7 +82,7 @@ public class LimitOrderEngine extends OrderEngine {
       // Our old order matches the incoming order type.
       // Cancel the old order, and place a new one at the current best limit price.
       if (orderTypeMatchesExisting) {
-        LOG.info("Remnant order matching new order type.");
+        LOG.info("Remnant order, same order type.");
 
         // True if the order was cancelled, false if it already filled.
         ListenableFuture<Boolean> canceled = tradingApi.cancelAllOrders();

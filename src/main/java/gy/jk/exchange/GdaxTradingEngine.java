@@ -19,7 +19,6 @@ import org.knowm.xchange.service.account.AccountService;
 import org.knowm.xchange.service.marketdata.MarketDataService;
 import org.knowm.xchange.service.trade.TradeService;
 import org.knowm.xchange.service.trade.params.CancelAllOrders;
-import org.knowm.xchange.service.trade.params.CancelOrderParams;
 import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamCurrencyPair;
 
 import java.math.BigDecimal;
