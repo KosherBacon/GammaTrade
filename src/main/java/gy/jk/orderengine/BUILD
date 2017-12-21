@@ -21,6 +21,7 @@ java_library(
         "orderengine",
         "//src/main/java/gy/jk/exchange:annotations",
         "//src/main/java/gy/jk/exchange:trading_api",
+        "//src/main/java/gy/jk/trade:annotations",
         "@guava//jar",
         "@guice//:compile",
         "@log4j//:compile",

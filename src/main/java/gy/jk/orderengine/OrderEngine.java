@@ -38,7 +38,7 @@ public abstract class OrderEngine {
    * memory to keep it simple.
    * </p>
    */
-  private static class OrderState {
+   static class OrderState {
 
     /**
      * Id - default to null.
