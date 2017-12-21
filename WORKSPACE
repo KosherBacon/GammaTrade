@@ -184,10 +184,21 @@ maven_jar(
     artifact = "junit:junit:4.12",
 )
 
-maven_jar(
-    name = "mockito",
-    artifact = "org.mockito:mockito-all:1.10.19",
+
+maven_repository(
+    name = 'mockito',
+    deps = [
+        'org.mockito:mockito-core:2.13.0',
+    ],
+    transitive_deps = [
+        '51218a01a882c04d0aba8c028179cce488bbcb58:net.bytebuddy:byte-buddy:1.7.9',
+        'a6c65f9da7f467ee1f02ff2841ffd3155aee2fc9:net.bytebuddy:byte-buddy-agent:1.7.9',
+        '8e372943974e4a121fb8617baced8ebfe46d54f0:org.mockito:mockito-core:2.13.0',
+        '639033469776fd37c08358c6b92a4761feb2af4b:org.objenesis:objenesis:2.6',
+    ],
 )
+load("@mockito//:rules.bzl", "mockito_runtime", "mockito_default")
+mockito_default()
 
 #maven_repository(
 #    name = 'junit',

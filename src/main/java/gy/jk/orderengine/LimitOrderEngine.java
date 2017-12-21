@@ -2,7 +2,7 @@ package gy.jk.orderengine;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.inject.Inject;
 import gy.jk.exchange.Annotations.LiveTrading;
 import gy.jk.exchange.TradingApi;
@@ -41,13 +41,13 @@ public class LimitOrderEngine extends OrderEngine {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final ListeningScheduledExecutorService executorService;
+  private final ListeningExecutorService executorService;
   private final TradingApi tradingApi;
   private final CurrencyPair currencyPair;
   private final boolean liveTrading;
 
   @Inject
-  LimitOrderEngine(ListeningScheduledExecutorService executorService,
+  public LimitOrderEngine(ListeningExecutorService executorService,
       TradingApi tradingApi,
       CurrencyPair currencyPair,
       @LiveTrading boolean liveTrading) {
@@ -173,7 +173,7 @@ public class LimitOrderEngine extends OrderEngine {
     }, executorService);
   }
 
-  private ListenableFuture<BigDecimal> getAmountAtBestPrice(Currency currency,
+  public ListenableFuture<BigDecimal> getAmountAtBestPrice(Currency currency,
       ListenableFuture<BigDecimal> price) {
 
     ListenableFuture<BigDecimal> balance =

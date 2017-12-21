@@ -1,6 +1,7 @@
 package gy.jk;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.AbstractModule;
@@ -20,12 +21,15 @@ public class BackendModule extends AbstractModule {
   private static final int NUM_THREADS = 16;
   private static final ScheduledExecutorService TRADER_EXECUTOR_SERVICE =
       Executors.newScheduledThreadPool(NUM_THREADS);
-  private static final ListeningScheduledExecutorService LISTENING_EXECUTOR_SERVICE =
+  private static final ListeningScheduledExecutorService LISTENING_SCHEDULED_EXECUTOR_SERVICE =
+      MoreExecutors.listeningDecorator(TRADER_EXECUTOR_SERVICE);
+  private static final ListeningExecutorService LISTENING_EXECUTOR_SERVICE =
       MoreExecutors.listeningDecorator(TRADER_EXECUTOR_SERVICE);
 
   @Override
   protected void configure() {
-    bind(ListeningScheduledExecutorService.class).toInstance(LISTENING_EXECUTOR_SERVICE);
+    bind(ListeningExecutorService.class).toInstance(LISTENING_EXECUTOR_SERVICE);
+    bind(ListeningScheduledExecutorService.class).toInstance(LISTENING_SCHEDULED_EXECUTOR_SERVICE);
 
     bind(EventBus.class).toInstance(BACKEND_EVENT_BUS);
     bindListener(Matchers.any(), new TypeListener() {
