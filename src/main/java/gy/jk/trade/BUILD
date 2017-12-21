@@ -26,7 +26,7 @@ java_library(
     ],
     deps = [
         "annotations",
-        "//src/main/java/gy/jk/exchange:trading_api",
+        "//src/main/java/gy/jk/orderengine:orderengine",
         "//src/main/java/gy/jk/strategy:strategy_builder",
         "@guice//:compile",
         "@log4j//:compile",

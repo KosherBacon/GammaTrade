@@ -22,19 +22,6 @@ java_library(
 )
 
 java_library(
-    name = "order_engine",
-    srcs = [
-        "OrderEngine.java",
-    ],
-    deps = [
-        "annotations",
-        "@guice//:compile",
-        "@ta4j//:compile",
-        "@xchange_core//jar",
-    ],
-)
-
-java_library(
     name = "trading_api",
     srcs = [
         "TradingApi.java",

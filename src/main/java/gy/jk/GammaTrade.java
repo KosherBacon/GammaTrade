@@ -8,6 +8,7 @@ import gy.jk.datarecorder.DataRecorderModule;
 import gy.jk.email.EmailModule;
 import gy.jk.exchange.ExchangeConnector;
 import gy.jk.exchange.ExchangeModule;
+import gy.jk.orderengine.OrderEngineModule;
 import gy.jk.tick.TickModule;
 import gy.jk.trade.TradeModule;
 
@@ -40,6 +41,7 @@ public class GammaTrade {
     Injector injector = Guice.createInjector(
         new BackendModule(),
         new ExchangeModule(),
+        new OrderEngineModule(),
         new DataRecorderModule(),
         new TickModule(),
         new TradeModule(),

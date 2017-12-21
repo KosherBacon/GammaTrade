@@ -12,6 +12,7 @@ java_library(
         "//src/main/java/gy/jk/email:email_module",
         "//src/main/java/gy/jk/exchange:exchange_connector",
         "//src/main/java/gy/jk/exchange:exchange_module",
+        "//src/main/java/gy/jk/orderengine:orderengine_module",
         "//src/main/java/gy/jk/tick:tick_module",
         "//src/main/java/gy/jk/trade:trade_module",
         "@guava//jar",
