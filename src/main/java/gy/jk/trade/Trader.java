@@ -1,7 +1,5 @@
 package gy.jk.trade;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -9,20 +7,14 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import gy.jk.orderengine.OrderEngine;
 import gy.jk.strategy.StrategyBuilder;
-import gy.jk.trade.Annotations.MaximumOrderSize;
 import gy.jk.trade.Annotations.TradeStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.knowm.xchange.currency.Currency;
-import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
 import org.ta4j.core.Strategy;
 import org.ta4j.core.Tick;
 import org.ta4j.core.TimeSeries;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
