@@ -84,37 +84,52 @@ public class LimitOrderAsyncEngine extends OrderEngine {
       if (orderTypeMatchesExisting) {
         LOG.info("Remnant order, same order type.");
 
-        // True if the order was cancelled, false if it already filled.
-        ListenableFuture<Boolean> canceled = tradingApi.cancelAllOrders();
-        return Futures.transformAsync(canceled, wasCanceled -> {
-          // If this was true, then we can continue.
-          // If this was false, then do nothing as our order filled and orderType matched the
-          // incoming request.
-          if (Objects.requireNonNull(wasCanceled, "Failed to cancel orders!")) {
-            LOG.info("Successfully canceled orders.");
+        ListenableFuture<BigDecimal> price =
+            tradingApi.getBestPriceFromOrderBook(orderType, currencyPair);
+        Optional<LimitOrder> existingOrder = limitOrders.stream()
+            .filter(order -> order.getType() == orderType)
+            .findFirst();
+        if (existingOrder.isPresent()) {
+          LimitOrder previousOrder = existingOrder.get();
+          return Futures.transformAsync(price, assetPrice -> {
+            Objects.requireNonNull(assetPrice, "Asset price was null!");
+            // Check if the best price is the same as our current order.
+            if (assetPrice.compareTo(previousOrder.getLimitPrice()) != 0) {
+              // True if the order was cancelled, false if it already filled.
+              ListenableFuture<Boolean> canceled = tradingApi.cancelAllOrders();
+              return Futures.transformAsync(canceled, wasCanceled -> {
+                // If this was true, then we can continue.
+                // If this was false, then do nothing as our order filled and orderType matched the
+                // incoming request.
+                if (Objects.requireNonNull(wasCanceled, "Failed to cancel orders!")) {
+                  LOG.info("Successfully canceled orders.");
 
-            // Put in a new order at the current best limit order price.
-            ListenableFuture<BigDecimal> price =
-                tradingApi.getBestPriceFromOrderBook(orderType, currencyPair);
-            ListenableFuture<BigDecimal> amount = getAmountAtBestPrice(currency, price);
-            ListenableFuture<List<BigDecimal>> priceAmountData = Futures.allAsList(price, amount);
-            return Futures.transformAsync(priceAmountData, values -> {
-              Objects.requireNonNull(values, "priceAmountData was null!");
-              BigDecimal priceVal = Objects.requireNonNull(values.get(0), "Price was null!");
-              BigDecimal amountVal = Objects.requireNonNull(values.get(1), "Amount was null!");
-              if (!liveTrading) {
-                return Futures.immediateFuture(Optional.of("not-live-trade-id"));
-              }
-              ListenableFuture<String> order = tradingApi.createLimitOrder(orderType, currencyPair,
-                  amountVal, priceVal);
-              return Futures.transformAsync(order, orderStr -> {
-                Objects.requireNonNull(orderStr, "orderStr was null!");
-                return Futures.immediateFuture(Optional.of(orderStr));
-              });
-            }, executorService);
-          }
+                  // Put in a new order at the current best limit order price.
+                  ListenableFuture<BigDecimal> amount = getAmountAtBestPrice(currency, price);
+                  ListenableFuture<List<BigDecimal>> priceAmountData = Futures.allAsList(price, amount);
+                  return Futures.transformAsync(priceAmountData, values -> {
+                    Objects.requireNonNull(values, "priceAmountData was null!");
+                    BigDecimal priceVal = Objects.requireNonNull(values.get(0), "Price was null!");
+                    BigDecimal amountVal = Objects.requireNonNull(values.get(1), "Amount was null!");
+                    if (!liveTrading) {
+                      return Futures.immediateFuture(Optional.of("not-live-trade-id"));
+                    }
+                    ListenableFuture<String> order = tradingApi.createLimitOrder(orderType, currencyPair,
+                        amountVal, priceVal);
+                    return Futures.transformAsync(order, orderStr -> {
+                      Objects.requireNonNull(orderStr, "orderStr was null!");
+                      return Futures.immediateFuture(Optional.of(orderStr));
+                    });
+                  }, executorService);
+                }
+                return Futures.immediateFuture(Optional.empty());
+              }, executorService);
+            }
+            return Futures.immediateFuture(Optional.empty());
+          }, executorService);
+        } else {
           return Futures.immediateFuture(Optional.empty());
-        }, executorService);
+        }
       } else if (orderTypeDifferentThanExisting) {
         LOG.info("Remnant order different than existing order.");
 
@@ -173,7 +188,7 @@ public class LimitOrderAsyncEngine extends OrderEngine {
     }, executorService);
   }
 
-  public ListenableFuture<BigDecimal> getAmountAtBestPrice(Currency currency,
+  private ListenableFuture<BigDecimal> getAmountAtBestPrice(Currency currency,
       ListenableFuture<BigDecimal> price) {
 
     ListenableFuture<BigDecimal> balance =

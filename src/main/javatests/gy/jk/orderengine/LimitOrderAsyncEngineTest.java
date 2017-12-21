@@ -68,7 +68,7 @@ public class LimitOrderAsyncEngineTest {
      * - Place new order
      */
     LimitOrder limitOrder = new LimitOrder.Builder(OrderType.BID, CURRENCY_PAIR)
-        .limitPrice(BigDecimal.valueOf(2))
+        .limitPrice(BigDecimal.valueOf(0.5))
         .originalAmount(BigDecimal.TEN)
         .build();
     openOrders = new OpenOrders(Collections.singletonList(limitOrder));
