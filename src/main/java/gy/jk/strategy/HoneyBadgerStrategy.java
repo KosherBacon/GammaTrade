@@ -113,18 +113,21 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
     // Mode -1
     Rule ma2OverResistance = greenDragon
         .and(new OverIndicatorRule(ma2, resistance));
+    greenDragon = greenDragon.and(new NotRule(ma2OverResistance));
 
     // Previous Mode -1
     Rule ma2OverResistancei = greenDragoni
         .and(new OverIndicatorRule(ma2i, resistancei));
+    greenDragoni = greenDragoni.and(new NotRule(ma2OverResistancei));
 
     // Double Previous Mode -1
     Rule ma2OverResistanceii = greenDragonii
         .and(new OverIndicatorRule(ma2ii, resistanceii));
+    greenDragonii = greenDragonii.and(new NotRule(ma2OverResistanceii));
 
     // Mode 3
-    Rule redDragon = new NotRule(greenDragon)
-        .and(new NotRule(ma2OverResistance))
+    Rule redDragon = new NotRule(greenDragon) // Not Mode 1
+        .and(new NotRule(ma2OverResistance)) // Not Mode -1
         .and(new UnderIndicatorRule(resistance, ma150)
             .and(new UnderIndicatorRule(ma2, ma90))
             .and(new UnderIndicatorRule(ma2, ma150))
@@ -132,8 +135,8 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
             .and(new UnderIndicatorRule(resistance, ma90)));
 
     // Previous Mode 3
-    Rule redDragoni = new NotRule(greenDragoni)
-        .and(new NotRule(ma2OverResistancei))
+    Rule redDragoni = new NotRule(greenDragoni) // Not Mode 1
+        .and(new NotRule(ma2OverResistancei)) // Not Mode -1
         .and(new UnderIndicatorRule(resistancei, ma150i)
             .and(new UnderIndicatorRule(ma2i, ma90i))
             .and(new UnderIndicatorRule(ma2i, ma150i))
@@ -141,8 +144,8 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
             .and(new UnderIndicatorRule(resistancei, ma90i)));
 
     // Double Previous Mode 3
-    Rule redDragonii = new NotRule(greenDragonii)
-        .and(new NotRule(ma2OverResistanceii))
+    Rule redDragonii = new NotRule(greenDragonii) // Not Mode 1
+        .and(new NotRule(ma2OverResistanceii)) // Not Mode -1
         .and(new UnderIndicatorRule(resistanceii, ma150ii)
             .and(new UnderIndicatorRule(ma2ii, ma90ii))
             .and(new UnderIndicatorRule(ma2ii, ma150ii))
@@ -150,8 +153,9 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
             .and(new UnderIndicatorRule(resistanceii, ma90ii)));
 
     // Mode 2
-    Rule capitulation = new NotRule(greenDragon)
-        .and(new NotRule(redDragon));
+    Rule capitulation = new NotRule(greenDragon) // Not Mode 1
+        .and(new NotRule(ma2OverResistance)) // Not Mode -1
+        .and(new NotRule(redDragon)); // Not Mode 3
 
     Rule finalCapitulation = capitulation;
     capitulation = capitulation.and(
@@ -161,8 +165,9 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
             .or(redDragoni));
 
     // Previous Mode 2
-    Rule capitulationi = new NotRule(greenDragoni)
-        .and(new NotRule(redDragoni));
+    Rule capitulationi = new NotRule(greenDragoni) // Not Mode 1
+        .and(new NotRule(ma2OverResistancei)) // Not Mode -1
+        .and(new NotRule(redDragoni)); // Not Mode 3
 
     Rule finalCapitulationi = capitulationi;
     capitulationi = capitulationi.and(
@@ -172,19 +177,22 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
             .or(redDragonii));
 
     // Mode 4
-    Rule catBounce = new NotRule(greenDragon)
-        .and(new NotRule(redDragon))
-        .and(new NotRule(capitulation));
+    Rule catBounce = new NotRule(greenDragon) // Not Mode 1
+        .and(new NotRule(ma2OverResistance)) // Not Mode -1
+        .and(new NotRule(redDragon)) // Not Mode 3
+        .and(new NotRule(capitulation)); // Not Mode 2
 
     // Previous Mode 4
-    Rule catBouncei = new NotRule(greenDragoni)
-        .and(new NotRule(redDragoni))
-        .and(new NotRule(capitulationi));
+    Rule catBouncei = new NotRule(greenDragoni) // Not Mode 1
+        .and(new NotRule(ma2OverResistancei)) // Not Mode -1
+        .and(new NotRule(redDragoni)) // Not Mode 3
+        .and(new NotRule(capitulationi)); // Not Mode 2
 
     // Mode 3 Signal
     Rule mode3Signal1 = redDragon
         .and(new UnderIndicatorRule(ma2, floor));
     Rule mode3SignalN1 = redDragon
+        .and(new NotRule(mode3Signal1)) // Not already Signal 1
         .and((new UnderIndicatorRule(ma2, ma2i)
             .and(new UnderIndicatorRule(ma2, ma30))
             .and(new OverIndicatorRule(ma2i, ma30)))
@@ -204,21 +212,25 @@ public class HoneyBadgerStrategy implements StrategyBuilder {
             .and(new UnderIndicatorRule(ma90, ma30))
             .and(new OverIndicatorRule(ma90, ma90i)));
 
+    Rule mode0Buy = new NotRule(greenDragon)
+        .and(new NotRule(ma2OverResistance))
+        .and(new NotRule(redDragon))
+        .and(new NotRule(capitulation))
+        .and(new NotRule(catBounce));
     Rule buyingRule = mode1Buy
         .or(mode2Buy)
         .or(mode3Buy)
-        .or(mode4Buy);
+        .or(mode4Buy)
+        .or(mode0Buy);
 
     Rule modeN1Sell = ma2OverResistance;
     Rule mode2Sell = (capitulation.and(new NotRule(capitulationi)))
-        .or(capitulation
-            .and(capitulationi)
+        .or(capitulation.and(capitulationi)
             .and(new OverIndicatorRule(ma2,
                 new MultiplierIndicator(ma90, Decimal.valueOf("1.1"))))
             .and(new OverIndicatorRule(ma2, ma60)));
     Rule mode3Sell = (redDragon.and(new NotRule(redDragoni)))
-        .or(redDragon
-            .and(redDragoni)
+        .or(redDragon.and(redDragoni)
             .and(mode3SignalN1));
     Rule mode4Sell = (catBounce.and(catBouncei))
         .and(new UnderIndicatorRule(ma2,
