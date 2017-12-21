@@ -216,7 +216,8 @@ mockito_default()
 maven_repository(
     name = 'google_truth',
     deps = [
-        'com.google.truth:truth:0.36',
+        'com.google.truth:truth:0.37',
+        'com.google.truth.extensions:truth-java8-extension:0.37',
     ],
     force = [
         'com.google.errorprone:error_prone_annotations:2.0.19',
@@ -224,9 +225,10 @@ maven_repository(
     transitive_deps = [
         '40719ea6961c0cb6afaeb6a921eaa1f6afd4cfdf:com.google.code.findbugs:jsr305:1.3.9',
         'c3754a0bdd545b00ddc26884f9e7624f8b6a14de:com.google.errorprone:error_prone_annotations:2.0.19',
-        '7b2fc7ef242f35bc2c9a3b816ed846c9345e3f95:com.google.guava:guava:22.0-android',
+        '6b52ce80a01cdd1bda08d81d2e4035e5399ee903:com.google.guava:guava:23.4-android',
         'ed28ded51a8b1c6b112568def5f4b455e6809019:com.google.j2objc:j2objc-annotations:1.1',
-        '7485219d2c1d341097a19382c02bde07e69ff5d2:com.google.truth:truth:0.36',
+        '9d4bbea5ff8da23ed9c7004e5d1f31a2b3e32429:com.google.truth.extensions:truth-java8-extension:0.37',
+        '0d073fb8b230928122fd93ed6036c94a0ac9922d:com.google.truth:truth:0.37',
         '2973d150c0dc1fefe998f834810d68f278ea58ec:junit:junit:4.12',
         '775b7e22fb10026eed3f86e8dc556dfafe35f2d5:org.codehaus.mojo:animal-sniffer-annotations:1.14',
         '42a25dc3219429f0e5d060061f71acb49bf010a0:org.hamcrest:hamcrest-core:1.3',
