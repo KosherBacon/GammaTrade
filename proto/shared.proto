@@ -15,6 +15,7 @@ message BacktestResult {
     optional double versus_buy_and_hold = 9;
     // Total transaction cost (from $1000)
     optional double total_transaction_cost = 10;
+    optional string strategy_name = 11;
 }
 
 message Exchange {

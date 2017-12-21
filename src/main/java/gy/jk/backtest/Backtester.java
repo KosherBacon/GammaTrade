@@ -69,6 +69,7 @@ public class Backtester {
           .setVersusBuyAndHold(
               new VersusBuyAndHoldCriterion(totalProfit).calculate(timeSeries, tradingRecord))
           .setTotalTransactionCost(transactionCost.calculate(timeSeries, tradingRecord))
+          .setStrategyName(strategyBuilder.getClass().getSimpleName())
           .build());
 
       Instant end = Instant.now();
