@@ -84,7 +84,7 @@ public class Trader {
    */
   private void executeBuy() {
     ListenableFuture<Optional<String>> orderIdOptional = orderEngine.placeOrder(OrderType.BID);
-    orderIdOptional = Futures.withTimeout(orderIdOptional, 3000, TimeUnit.MILLISECONDS,
+    orderIdOptional = Futures.withTimeout(orderIdOptional, 5000, TimeUnit.MILLISECONDS,
         executorService);
     Futures.addCallback(orderIdOptional, new FutureCallback<Optional<String>>() {
       @Override
@@ -104,7 +104,7 @@ public class Trader {
    */
   private void executeSell() {
     ListenableFuture<Optional<String>> orderIdOptional = orderEngine.placeOrder(OrderType.ASK);
-    orderIdOptional = Futures.withTimeout(orderIdOptional, 3000, TimeUnit.MILLISECONDS,
+    orderIdOptional = Futures.withTimeout(orderIdOptional, 5000, TimeUnit.MILLISECONDS,
         executorService);
     Futures.addCallback(orderIdOptional, new FutureCallback<Optional<String>>() {
       @Override
