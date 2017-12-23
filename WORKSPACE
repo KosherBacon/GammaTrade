@@ -111,7 +111,7 @@ maven_repository(
     name = 'xchange_gdax',
     deps = [
         'org.knowm.xchange:xchange-gdax:4.3.1',
-        'info.bitrich.xchange-stream:xchange-gdax:4.3.0',
+        'info.bitrich.xchange-stream:xchange-gdax:4.3.1',
     ],
     force = [
         'org.knowm.xchange:xchange-gdax:4.3.1',
@@ -127,7 +127,7 @@ maven_repository(
     name = 'xchange_gemini',
     deps = [
         'org.knowm.xchange:xchange-gemini:4.3.1',
-        'info.bitrich.xchange-stream:xchange-gemini:4.3.0',
+        'info.bitrich.xchange-stream:xchange-gemini:4.3.1',
     ],
     force = [
         'org.knowm.xchange:xchange-gemini:4.3.1',
@@ -142,10 +142,11 @@ xchange_gemini_default()
 maven_repository(
     name = 'xchange_stream_core',
     deps = [
-        'info.bitrich.xchange-stream:xchange-stream-core:4.3.0',
+        'info.bitrich.xchange-stream:xchange-stream-core:4.3.1',
     ],
     force = [
         'org.slf4j:slf4j-api:1.7.25',
+        'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     ],
 )
 load("@xchange_stream_core//:rules.bzl", "xchange_stream_core_runtime", "xchange_stream_core_default")
@@ -156,27 +157,27 @@ xchange_stream_core_default()
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/98836a56e616f3bc387e3c66133b1ad320f36d80.zip"],
-    strip_prefix = "protobuf-98836a56e616f3bc387e3c66133b1ad320f36d80",
-    sha256 = "2fa7b21d90558ac4986518ff0547c598382dd3976b37b9a77a5998f3a2c2b9bc",
+    urls = ["https://github.com/google/protobuf/archive/106ffc04be1abf3ff3399f54ccf149815b287dd9.zip"],
+    strip_prefix = "protobuf-106ffc04be1abf3ff3399f54ccf149815b287dd9",
+    sha256 = "4d127e1c3608803bc845cc4b3c8c42a6a16263b6ddcb932b53049e7ec8101398",
 )
 
 # cc_proto_library rules implicitly depend on @com_google_protobuf_cc//:cc_toolchain,
 # which is the C++ proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_cc",
-    urls = ["https://github.com/google/protobuf/archive/98836a56e616f3bc387e3c66133b1ad320f36d80.zip"],
-    strip_prefix = "protobuf-98836a56e616f3bc387e3c66133b1ad320f36d80",
-    sha256 = "2fa7b21d90558ac4986518ff0547c598382dd3976b37b9a77a5998f3a2c2b9bc",
+    urls = ["https://github.com/google/protobuf/archive/106ffc04be1abf3ff3399f54ccf149815b287dd9.zip"],
+    strip_prefix = "protobuf-106ffc04be1abf3ff3399f54ccf149815b287dd9",
+    sha256 = "4d127e1c3608803bc845cc4b3c8c42a6a16263b6ddcb932b53049e7ec8101398",
 )
 
 # java_proto_library rules implicitly depend on @com_google_protobuf_java//:java_toolchain,
 # which is the Java proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_java",
-    urls = ["https://github.com/google/protobuf/archive/98836a56e616f3bc387e3c66133b1ad320f36d80.zip"],
-    strip_prefix = "protobuf-98836a56e616f3bc387e3c66133b1ad320f36d80",
-    sha256 = "2fa7b21d90558ac4986518ff0547c598382dd3976b37b9a77a5998f3a2c2b9bc",
+    urls = ["https://github.com/google/protobuf/archive/106ffc04be1abf3ff3399f54ccf149815b287dd9.zip"],
+    strip_prefix = "protobuf-106ffc04be1abf3ff3399f54ccf149815b287dd9",
+    sha256 = "4d127e1c3608803bc845cc4b3c8c42a6a16263b6ddcb932b53049e7ec8101398",
 )
 
 maven_jar(
