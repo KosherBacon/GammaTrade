@@ -107,4 +107,13 @@ public class LimitOrderAsyncEngineTest {
         .isEmpty();
   }
 
+  @Test
+  public void testRemnantOrderOtherSide() throws Exception {
+    LimitOrder limitOrder = new LimitOrder.Builder(OrderType.ASK, CURRENCY_PAIR)
+        .limitPrice(BigDecimal.ONE)
+        .originalAmount(BigDecimal.TEN)
+        .build();
+    openOrders = new OpenOrders(Collections.singletonList(limitOrder));
+  }
+
 }

@@ -30,6 +30,7 @@ java_library(
         "HoneyBadgerStrategy.java",
         "KurtStrategy.java",
         "MomentumStrategy.java",
+        "ParabolicSARStrategy.java",
         "PrimaryStrategy.java",
         "RSIStrategy.java",
     ],

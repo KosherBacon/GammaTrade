@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.knowm.xchange.currency.Currency;
-import org.knowm.xchange.dto.Order;
+import org.knowm.xchange.dto.Order.OrderType;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -26,7 +26,7 @@ public abstract class OrderEngine {
           .put(Currency.ETH, BigDecimal.valueOf(1, -3))
       .build();
 
-  public abstract ListenableFuture<Optional<String>> placeOrder(Order.OrderType orderType);
+  public abstract ListenableFuture<Optional<String>> placeOrder(OrderType orderType);
 
   /**
    * <p>
@@ -43,23 +43,23 @@ public abstract class OrderEngine {
     /**
      * Id - default to null.
      */
-    private String id = null;
+    String id = null;
 
     /**
      * Type: buy/sell. We default to null which means no order has been placed yet,
      * i.e. we've just started!
      */
-    private Order.OrderType type = null;
+    OrderType type = null;
 
     /**
      * Price to buy/sell at - default to zero.
      */
-    private BigDecimal price = BigDecimal.ZERO;
+    BigDecimal price = BigDecimal.ZERO;
 
     /**
      * Number of units to buy/sell - default to zero.
      */
-    private BigDecimal amount = BigDecimal.ZERO;
+    BigDecimal amount = BigDecimal.ZERO;
 
     @Override
     public String toString() {
