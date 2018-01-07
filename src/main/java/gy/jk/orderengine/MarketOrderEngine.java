@@ -56,12 +56,23 @@ public class MarketOrderEngine extends OrderEngine {
     return Futures.transformAsync(counterBalance, amount -> {
       BigDecimal toBuy = Objects.requireNonNull(amount, "Amount was null!")
           .min(maximumOrderSize);
-      return null;
-    });
+      ListenableFuture<String> marketOrder = tradingApi.createMarketOrder(OrderType.BID, currencyPair, toBuy);
+      return Futures.transformAsync(marketOrder, order ->
+          Futures.immediateFuture(Optional.of(Objects.requireNonNull(order, "OrderId was null!"))),
+          executorService);
+    }, executorService);
   }
 
   private ListenableFuture<Optional<String>> executeSell(OrderType orderType) {
-    return null;
+    ListenableFuture<BigDecimal> baseBalance =
+        tradingApi.getAvailableBalance(currencyPair.base);
+    return Futures.transformAsync(baseBalance, amount -> {
+      BigDecimal toSell = Objects.requireNonNull(amount, "Amount was null!");
+      ListenableFuture<String> marketOrder = tradingApi.createMarketOrder(OrderType.ASK, currencyPair, toSell);
+      return Futures.transformAsync(marketOrder, order ->
+              Futures.immediateFuture(Optional.of(Objects.requireNonNull(order, "OrderId was null!"))),
+          executorService);
+    }, executorService);
   }
 
 }
