@@ -3,6 +3,7 @@ package gy.jk.trade;
 import com.google.inject.AbstractModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import gy.jk.strategy.ParabolicSARStrategy;
 import gy.jk.strategy.PrimaryStrategy;
 import gy.jk.strategy.RSIStrategy;
 import gy.jk.strategy.StrategyBuilder;
@@ -29,6 +30,9 @@ public class TradeModule extends AbstractModule {
         break;
       case "rsi":
         bind(StrategyBuilder.class).annotatedWith(TradeStrategy.class).to(RSIStrategy.class);
+        break;
+      case "sar":
+        bind(StrategyBuilder.class).annotatedWith(TradeStrategy.class).to(ParabolicSARStrategy.class);
         break;
     }
     bind(BigDecimal.class).annotatedWith(MaximumOrderSize.class).toInstance(MAXIMUM_ORDER_SIZE);
