@@ -4,11 +4,13 @@ import com.google.inject.AbstractModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gy.jk.exchange.Annotations.*;
+import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.ExchangeFactory;
 import org.knowm.xchange.ExchangeSpecification;
+import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.gdax.GDAXExchange;
 import org.knowm.xchange.gemini.v1.GeminiExchange;
 import org.knowm.xchange.service.account.AccountService;
@@ -24,6 +26,10 @@ public class ExchangeModule extends AbstractModule {
   protected void configure() {
     switch (APPLICATION_CONFIG.getString("exchange")) {
       case "gdax":
+        ProductSubscription productSubscription = ProductSubscription.create()
+            .addAll(CurrencyPair.BTC_USD)
+            .build();
+
         Exchange gdaxExchange = ExchangeFactory.INSTANCE.createExchange(GDAXExchange.class.getName());
         ExchangeSpecification gdaxExchangeSpec = gdaxExchange.getDefaultExchangeSpecification();
 
@@ -41,6 +47,7 @@ public class ExchangeModule extends AbstractModule {
         bind(MarketDataService.class).toInstance(gdaxExchange.getMarketDataService());
         bind(StreamingExchange.class).toInstance(gdaxStreaming);
         bind(TradingApi.class).to(GdaxTradingEngine.class);
+        bind(ProductSubscription.class).toInstance(productSubscription);
         break;
       case "gemini":
         Exchange geminiExchange =

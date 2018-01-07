@@ -9,6 +9,7 @@ import gy.jk.email.Emailer;
 import gy.jk.exchange.Annotations.ExchangeConnectionTimeout;
 import gy.jk.proto.Shared;
 import gy.jk.proto.Shared.Trade;
+import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import io.reactivex.disposables.Disposable;
@@ -26,15 +27,16 @@ public class ExchangeConnector {
       HashBasedTable.create();
 
   private final StreamingExchange exchange;
+  private final ProductSubscription productSubscription;
   private final long exchangeConnectionTimeout;
   private final TradeReceiver tradeReceiver;
   private final Emailer emailer;
 
   @Inject
-  ExchangeConnector(StreamingExchange exchange,
-      @ExchangeConnectionTimeout long exchangeConnectionTimeout, TradeReceiver tradeReceiver,
-      Emailer emailer) {
+  ExchangeConnector(StreamingExchange exchange, ProductSubscription productSubscription,
+      @ExchangeConnectionTimeout long exchangeConnectionTimeout, TradeReceiver tradeReceiver, Emailer emailer) {
     this.exchange = exchange;
+    this.productSubscription = productSubscription;
     this.exchangeConnectionTimeout = exchangeConnectionTimeout;
     this.tradeReceiver = tradeReceiver;
     this.emailer = emailer;
@@ -42,7 +44,7 @@ public class ExchangeConnector {
 
   public void connectAndSubscribeAll() throws UncheckedTimeoutException {
     Throwable connect =
-        exchange.connect().blockingGet(exchangeConnectionTimeout, TimeUnit.MILLISECONDS);
+        exchange.connect(productSubscription).blockingGet(exchangeConnectionTimeout, TimeUnit.MILLISECONDS);
     if (connect != null) {
       throw new UncheckedTimeoutException(connect);
     }
