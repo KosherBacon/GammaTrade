@@ -222,9 +222,10 @@ maven_repository(
     ],
     force = [
         'com.google.errorprone:error_prone_annotations:2.0.19',
+        'com.google.code.findbugs:jsr305:3.0.1',
     ],
     transitive_deps = [
-        '40719ea6961c0cb6afaeb6a921eaa1f6afd4cfdf:com.google.code.findbugs:jsr305:1.3.9',
+        'f7be08ec23c21485b9b5a1cf1654c2ec8c58168d:com.google.code.findbugs:jsr305:3.0.1',
         'c3754a0bdd545b00ddc26884f9e7624f8b6a14de:com.google.errorprone:error_prone_annotations:2.0.19',
         '6b52ce80a01cdd1bda08d81d2e4035e5399ee903:com.google.guava:guava:23.4-android',
         'ed28ded51a8b1c6b112568def5f4b455e6809019:com.google.j2objc:j2objc-annotations:1.1',
