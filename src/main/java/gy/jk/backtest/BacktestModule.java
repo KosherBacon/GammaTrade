@@ -39,6 +39,8 @@ public class BacktestModule extends AbstractModule {
       case "honeyBadger":
         bind(StrategyBuilder.class).to(HoneyBadgerStrategy.class);
         break;
+      case "sar":
+        bind(StrategyBuilder.class).to(ParabolicSARStrategy.class);
     }
     bindConstant().annotatedWith(TickLengthMillis.class)
         .to(BACKTEST_CONFIG.getLong("tickLength"));
