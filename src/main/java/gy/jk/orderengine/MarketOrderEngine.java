@@ -16,6 +16,9 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * @author Joshua Kahn
+ */
 @Singleton
 public class MarketOrderEngine extends OrderEngine {
 
@@ -37,6 +40,8 @@ public class MarketOrderEngine extends OrderEngine {
     this.currencyPair = currencyPair;
     this.maximumOrderSize = maximumOrderSize;
     lastOrder = new OrderState();
+
+    LOG.info("Using {} for orders.", MarketOrderEngine.class.getName());
   }
 
   @Override
