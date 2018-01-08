@@ -107,7 +107,7 @@ public class Trader {
 
       @Override
       public void onFailure(Throwable t) {
-        LOG.error("BUY order failed!", t);
+        LOG.error("SELL order failed!", t);
       }
     });
   }
