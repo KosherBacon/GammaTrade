@@ -9,12 +9,14 @@ import gy.jk.exchange.TradingApi;
 import gy.jk.trade.Annotations.MaximumOrderSize;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Joshua Kahn
@@ -39,17 +41,33 @@ public class MarketOrderEngine extends OrderEngine {
     this.tradingApi = tradingApi;
     this.currencyPair = currencyPair;
     this.maximumOrderSize = maximumOrderSize;
+
     lastOrder = new OrderState();
+    try {
+      BigDecimal usdBalance = tradingApi.getAvailableBalance(Currency.USD).get();
+      BigDecimal btcBalance = tradingApi.getAvailableBalance(Currency.BTC).get();
+      if (usdBalance.compareTo(btcBalance) < 0) {
+        lastOrder.type = OrderType.BID; // BID = Buy
+        LOG.info("Last order was BUY!");
+      } else {
+        lastOrder.type = OrderType.ASK; // ASK = Sell
+        LOG.info("Last order was SELL!");
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
   public ListenableFuture<Optional<String>> placeOrder(OrderType orderType) {
-    if (orderType == OrderType.BID) {
+    if (orderType == OrderType.BID && lastOrder.type == OrderType.ASK) {
       LOG.info("Executing buy order on {}", tradingApi.getMarketName());
       return executeBuy(orderType);
-    } else {
+    } else if (orderType == OrderType.ASK && lastOrder.type == OrderType.BID) {
       LOG.info("Executing sell order on {}", tradingApi.getMarketName());
       return executeSell(orderType);
+    } else {
+      return Futures.immediateFuture(Optional.of("no-trade-necessary"));
     }
   }
 
