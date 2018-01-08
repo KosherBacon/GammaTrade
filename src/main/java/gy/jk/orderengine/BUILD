@@ -18,6 +18,7 @@ java_library(
         "MarketOrderEngine.java",
     ],
     deps = [
+        "lastorderengine",
         "orderengine",
         "//src/main/java/gy/jk/exchange:annotations",
         "//src/main/java/gy/jk/exchange:trading_api",
@@ -27,6 +28,20 @@ java_library(
         "@log4j//:compile",
         "@xchange_core//jar",
     ],
+)
+
+java_library(
+    name = "lastorderengine",
+    srcs = [
+        "LastOrderEngine.java",
+    ],
+    deps = [
+        "//src/main/java/gy/jk/exchange:trading_api",
+        "@guava//jar",
+        "@guice//:compile",
+        "@log4j//:compile",
+        "@xchange_core//jar",
+    ]
 )
 
 java_library(

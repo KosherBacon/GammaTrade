@@ -9,7 +9,6 @@ import gy.jk.exchange.TradingApi;
 import gy.jk.trade.Annotations.MaximumOrderSize;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderType;
 
@@ -36,7 +35,8 @@ public class MarketOrderEngine extends OrderEngine {
   MarketOrderEngine(ListeningExecutorService executorService,
       TradingApi tradingApi,
       CurrencyPair currencyPair,
-      @MaximumOrderSize BigDecimal maximumOrderSize) {
+      @MaximumOrderSize BigDecimal maximumOrderSize,
+      LastOrderEngine lastOrderEngine) {
     this.executorService = executorService;
     this.tradingApi = tradingApi;
     this.currencyPair = currencyPair;
@@ -44,15 +44,7 @@ public class MarketOrderEngine extends OrderEngine {
 
     lastOrder = new OrderState();
     try {
-      BigDecimal usdBalance = tradingApi.getAvailableBalance(Currency.USD).get();
-      BigDecimal btcBalance = tradingApi.getAvailableBalance(Currency.BTC).get();
-      if (usdBalance.compareTo(btcBalance) < 0) {
-        lastOrder.type = OrderType.BID; // BID = Buy
-        LOG.info("Last order was BUY!");
-      } else {
-        lastOrder.type = OrderType.ASK; // ASK = Sell
-        LOG.info("Last order was SELL!");
-      }
+      lastOrder.type = lastOrderEngine.getLastTrade().get();
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
