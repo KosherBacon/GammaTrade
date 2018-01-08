@@ -42,6 +42,7 @@ public class Trader {
     this.executorService = executorService;
 
     LOG.info("Using strategy: {}", strategyBuilder.getClass().getSimpleName());
+    LOG.info("OrderEngine provided by: {}", orderEngine.getClass().getSimpleName());
   }
 
   public synchronized void receiveAndProcessTick(Tick tick) {

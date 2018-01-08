@@ -55,8 +55,6 @@ public class LimitOrderAsyncEngine extends OrderEngine {
     this.tradingApi = tradingApi;
     this.currencyPair = currencyPair;
     this.liveTrading = liveTrading;
-
-    LOG.info("Using {} for orders.", MarketOrderEngine.class.getName());
   }
 
   @Override

@@ -40,8 +40,6 @@ public class MarketOrderEngine extends OrderEngine {
     this.currencyPair = currencyPair;
     this.maximumOrderSize = maximumOrderSize;
     lastOrder = new OrderState();
-
-    LOG.info("Using {} for orders.", MarketOrderEngine.class.getName());
   }
 
   @Override
