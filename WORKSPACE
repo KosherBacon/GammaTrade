@@ -103,19 +103,19 @@ ta4j_default()
 
 maven_jar(
     name = "xchange_core",
-    artifact = "org.knowm.xchange:xchange-core:4.3.1",
-    sha1 = "b8f53d4f4c8b647913f0485f6792665a0e9db62e",
+    artifact = "org.knowm.xchange:xchange-core:4.3.2",
+    sha1 = "05c1cdacf77dc3982d80f6814545092b754c2a82",
 )
 
 maven_repository(
     name = 'xchange_gdax',
     deps = [
-        'org.knowm.xchange:xchange-gdax:4.3.1',
+        'org.knowm.xchange:xchange-gdax:4.3.2',
         'info.bitrich.xchange-stream:xchange-gdax:4.3.1',
     ],
     force = [
-        'org.knowm.xchange:xchange-gdax:4.3.1',
-        'org.knowm.xchange:xchange-core:4.3.1',
+        'org.knowm.xchange:xchange-gdax:4.3.2',
+        'org.knowm.xchange:xchange-core:4.3.2',
         'org.slf4j:slf4j-api:1.7.25',
         'com.fasterxml.jackson.core:jackson-databind:2.9.1',
     ],
@@ -126,12 +126,12 @@ xchange_gdax_default()
 maven_repository(
     name = 'xchange_gemini',
     deps = [
-        'org.knowm.xchange:xchange-gemini:4.3.1',
+        'org.knowm.xchange:xchange-gemini:4.3.2',
         'info.bitrich.xchange-stream:xchange-gemini:4.3.1',
     ],
     force = [
-        'org.knowm.xchange:xchange-gemini:4.3.1',
-        'org.knowm.xchange:xchange-core:4.3.1',
+        'org.knowm.xchange:xchange-gemini:4.3.2',
+        'org.knowm.xchange:xchange-core:4.3.2',
         'org.slf4j:slf4j-api:1.7.25',
         'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     ],

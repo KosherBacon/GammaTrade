@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import gy.jk.email.Emailer;
 import gy.jk.exchange.Annotations.LiveTrading;
 import org.apache.logging.log4j.LogManager;
@@ -18,12 +19,13 @@ import org.knowm.xchange.dto.trade.OpenOrders;
 import org.knowm.xchange.service.account.AccountService;
 import org.knowm.xchange.service.marketdata.MarketDataService;
 import org.knowm.xchange.service.trade.TradeService;
-import org.knowm.xchange.service.trade.params.CancelAllOrders;
+import org.knowm.xchange.service.trade.params.CancelOrderByCurrencyPair;
 import org.knowm.xchange.service.trade.params.orders.DefaultOpenOrdersParamCurrencyPair;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Singleton
 public class GdaxTradingEngine implements TradingApi {
 
   private static final Logger LOG = LogManager.getLogger();
@@ -32,6 +34,7 @@ public class GdaxTradingEngine implements TradingApi {
   private final TradeService tradeService;
   private final AccountService accountService;
   private final MarketDataService marketDataService;
+  private final CurrencyPair currencyPair;
   private final boolean liveTrading;
   private final Emailer emailer;
 
@@ -40,12 +43,14 @@ public class GdaxTradingEngine implements TradingApi {
       TradeService tradeService,
       AccountService accountService,
       MarketDataService marketDataService,
+      CurrencyPair currencyPair,
       @LiveTrading boolean liveTrading,
       Emailer emailer) {
     this.executorService = executorService;
     this.tradeService = tradeService;
     this.accountService = accountService;
     this.marketDataService = marketDataService;
+    this.currencyPair = currencyPair;
     this.liveTrading = liveTrading;
     this.emailer = emailer;
 
@@ -115,7 +120,7 @@ public class GdaxTradingEngine implements TradingApi {
 
   @Override
   public ListenableFuture<Boolean> cancelAllOrders() {
-    return executorService.submit(() -> tradeService.cancelOrder(new CancelAllOrders()));
+    return executorService.submit(() -> tradeService.cancelOrder((CancelOrderByCurrencyPair) () -> currencyPair));
   }
 
   @Override
