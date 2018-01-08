@@ -33,8 +33,11 @@ public class ExchangeConnector {
   private final Emailer emailer;
 
   @Inject
-  ExchangeConnector(StreamingExchange exchange, ProductSubscription productSubscription,
-      @ExchangeConnectionTimeout long exchangeConnectionTimeout, TradeReceiver tradeReceiver, Emailer emailer) {
+  ExchangeConnector(StreamingExchange exchange,
+      ProductSubscription productSubscription,
+      @ExchangeConnectionTimeout long exchangeConnectionTimeout,
+      TradeReceiver tradeReceiver,
+      Emailer emailer) {
     this.exchange = exchange;
     this.productSubscription = productSubscription;
     this.exchangeConnectionTimeout = exchangeConnectionTimeout;
@@ -69,7 +72,7 @@ public class ExchangeConnector {
           } catch (NullPointerException e) {
             LOG.error("Received data that shouldn't be NULL from exchange.", e);
           }
-    });
+        }, throwable -> LOG.error("Error received:", throwable));
     disposableTable.put(exchange, CurrencyPair.BTC_USD, disposable);
   }
 
