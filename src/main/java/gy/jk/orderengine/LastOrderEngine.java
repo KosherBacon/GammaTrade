@@ -26,7 +26,7 @@ public class LastOrderEngine {
   private final ListeningExecutorService executorService;
 
   @Inject
-  LastOrderEngine(TradingApi tradingApi,
+  public LastOrderEngine(TradingApi tradingApi,
       CurrencyPair currencyPair,
       ListeningExecutorService executorService) {
     this.tradingApi = tradingApi;
